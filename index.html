@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>WeldCheck – Visuel svejsekontrol</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#11140f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WeldCheck">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#11140f;--panel:#1b1f17;--panel2:#232818;--line:#3a4226;--ink:#eef0e6;
+    --muted:#9aa384;--accent:#c6f000;--accent2:#7fae00;--ok:#7ee081;--no:#ff6b5e;--warn:#ffce5c;
+    --B:#c6f000;--C:#5fb0ff;--D:#ffa14d;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:"DIN Alternate","Bahnschrift","Segoe UI",system-ui,sans-serif;line-height:1.4;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom);}
+  header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#1b1f17 0%,#161a11 100%);border-bottom:2px solid var(--accent2);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));}
+  .htop{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  header h1{margin:0;font-size:17px;letter-spacing:.5px;text-transform:uppercase;font-weight:800;}
+  header .sub{font-size:10.5px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase;margin-top:2px;}
+  .langbtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.12s;}
+  .langbtn:active{transform:scale(.96);}
+  .langbtn .fl{font-size:16px;line-height:1;}
+  .langbtn .cd{letter-spacing:1px;}
+  .langbtn .ar{color:var(--muted);font-size:9px;transition:.2s;}
+  .langbtn.open .ar{transform:rotate(180deg);}
+  .langmenu{position:absolute;right:16px;top:66px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:7px;z-index:60;display:none;box-shadow:0 12px 32px rgba(0,0,0,.55);min-width:188px;}
+  .langmenu.open{display:block;animation:drop .15s ease;}
+  @keyframes drop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+  .langmenu button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;color:var(--ink);padding:11px 14px;font-size:14.5px;font-family:inherit;cursor:pointer;border-radius:9px;font-weight:600;}
+  .langmenu button .fl{font-size:18px;line-height:1;}
+  .langmenu button .lc{display:inline-block;min-width:28px;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.5px;}
+  .langmenu button:active{background:var(--panel2);}
+  .langmenu button.on{background:var(--panel2);color:var(--accent);}
+  .langmenu button.on::after{content:'✓';margin-left:auto;color:var(--accent);font-weight:800;}
+
+  /* floating contact button */
+  .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:70;
+    width:54px;height:54px;border-radius:50%;background:var(--accent);border:none;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:.15s;}
+  .fab:active{transform:scale(.92);}
+  .fab svg{width:26px;height:26px;}
+  .installbtn{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:70;
+    display:flex;align-items:center;gap:8px;background:var(--accent);color:#11140f;border:none;
+    border-radius:14px;padding:12px 16px;font-family:inherit;font-size:14px;font-weight:800;letter-spacing:.3px;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer;transition:.15s;}
+  .installbtn:active{transform:scale(.94);}
+  .installbtn svg{width:20px;height:20px;}
+  .ios-hint{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:75;
+    background:var(--panel);border:1px solid var(--accent2);border-radius:14px;padding:14px 40px 14px 14px;
+    box-shadow:0 8px 28px rgba(0,0,0,.55);}
+  .ios-hint-row{display:flex;align-items:center;gap:12px;}
+  .ios-hint-row svg{width:26px;height:26px;flex-shrink:0;}
+  .ios-hint-row span{font-size:12.5px;color:var(--ink);line-height:1.5;}
+  .ios-x{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;font-family:inherit;}
+  .contact-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80;display:none;align-items:flex-end;justify-content:center;}
+  .contact-overlay.open{display:flex;animation:fade .15s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .contact-sheet{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent);
+    border-radius:18px 18px 0 0;width:100%;max-width:640px;padding:22px 20px calc(28px + env(safe-area-inset-bottom));
+    animation:sheet .2s ease;}
+  @keyframes sheet{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .contact-sheet h3{margin:0 0 4px;font-size:17px;letter-spacing:.3px;}
+  .contact-sheet p{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .contact-sheet .who{font-size:13px;color:var(--accent2);font-weight:700;margin-bottom:14px;}
+  .contact-sheet a.cbtn{display:flex;align-items:center;justify-content:center;gap:9px;
+    background:var(--accent);color:#11140f;text-decoration:none;font-weight:800;font-size:15px;
+    padding:14px;border-radius:11px;letter-spacing:.3px;}
+  .contact-sheet a.cbtn svg{width:20px;height:20px;}
+  .contact-sheet .closeb{display:block;width:100%;background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:inherit;font-size:13px;padding:12px;border-radius:11px;margin-top:10px;cursor:pointer;font-weight:600;}
+  .wrap{max-width:640px;margin:0 auto;padding:16px;}
+  .step-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin:0 0 10px 2px;font-weight:700;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:18px;}
+  .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .lvl{border:2px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:12px 6px;text-align:center;cursor:pointer;transition:.12s;}
+  .lvl .big{font-size:26px;font-weight:800;line-height:1;}
+  .lvl .desc{font-size:9.5px;color:var(--muted);margin-top:5px;letter-spacing:.3px;}
+  .lvl[data-l="B"].on{border-color:var(--B);box-shadow:0 0 0 1px var(--B);}
+  .lvl[data-l="C"].on{border-color:var(--C);box-shadow:0 0 0 1px var(--C);}
+  .lvl[data-l="D"].on{border-color:var(--D);box-shadow:0 0 0 1px var(--D);}
+  .lvl[data-l="B"].on .big{color:var(--B);}
+  .lvl[data-l="C"].on .big{color:var(--C);}
+  .lvl[data-l="D"].on .big{color:var(--D);}
+  .fatwrap{margin-top:14px;border-top:1px solid var(--line);padding-top:14px;}
+  .fattop{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .fatttl{font-size:13.5px;font-weight:700;letter-spacing:.3px;}
+  .fatsub{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .switch{position:relative;display:inline-block;width:50px;height:28px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .track{position:absolute;inset:0;background:#0e110b;border:1px solid var(--line);border-radius:28px;transition:.18s;}
+  .switch .track::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.18s;}
+  .switch input:checked + .track{background:var(--accent2);border-color:var(--accent);}
+  .switch input:checked + .track::before{transform:translateX(22px);background:#11140f;}
+  .fatlevels{display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .fatlevels.show{display:grid;}
+  .fatbtn{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:11px 6px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:.12s;}
+  .fatbtn.on{background:var(--accent);color:#11140f;border-color:var(--accent);}
+  .fatnote{display:none;font-size:11px;color:#aeb795;background:#0e110b;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:10px;line-height:1.5;}
+  .fatnote.show{display:block;}
+  .field{margin-bottom:12px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;}
+  .field .hint{font-size:10.5px;color:#6d7458;margin-top:3px;}
+  .inrow{display:flex;align-items:stretch;gap:8px;}
+  input[type=number]{flex:1;background:#0e110b;border:1px solid var(--line);color:var(--ink);font-size:22px;font-weight:700;border-radius:10px;padding:12px 14px;width:100%;font-family:inherit;}
+  input[type=number]:focus{outline:none;border-color:var(--accent);}
+  .unit{display:flex;align-items:center;color:var(--muted);font-size:13px;padding:0 4px;}
+  .seg{display:flex;gap:8px;}
+  .seg button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.3px;}
+  .seg button.on{background:var(--accent);color:#11140f;border-color:var(--accent);}
+  .seg button .segsub{display:block;font-size:9px;font-weight:600;opacity:.8;margin-top:2px;letter-spacing:.2px;text-transform:none;}
+  .amaal-note{font-size:11px;color:#aeb795;background:#0e110b;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:8px;display:none;}
+  .amaal-note.show{display:block;}
+  #results{margin-top:4px;}
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px;}
+  .defect{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .dh{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;}
+  .dnum{font-size:10px;background:#0e110b;border:1px solid var(--line);color:var(--muted);padding:3px 6px;border-radius:6px;font-weight:700;min-width:34px;text-align:center;}
+  .dname{flex:1;font-size:14px;font-weight:700;letter-spacing:.2px;}
+  .dval{font-size:13px;font-weight:800;text-align:right;white-space:nowrap;}
+  .dval.ok{color:var(--ok);}.dval.no{color:var(--no);}.dval.cond{color:var(--warn);}
+  .dbody{padding:0 14px 14px 14px;border-top:1px solid var(--line);display:none;}
+  .dbody.open{display:block;}
+  .drow{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed #2c331c;gap:10px;}
+  .drow:last-child{border-bottom:none;}
+  .drow .k{color:var(--muted);}
+  .drow .v{font-weight:700;text-align:right;}
+  .formula{font-size:11.5px;color:var(--muted);margin-top:8px;font-style:italic;}
+  .remark{font-size:11.5px;color:#aeb795;margin-top:8px;background:#0e110b;border-radius:8px;padding:8px 10px;border:1px solid var(--line);}
+  .figbox{margin-top:12px;background:#0e110b;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;}
+  .figbox svg{max-width:100%;height:auto;}
+  .figcap{font-size:10px;color:#6d7458;margin-top:6px;letter-spacing:.5px;}
+  .chev{color:var(--muted);font-size:14px;transition:.15s;}
+  .defect.open .chev{transform:rotate(90deg);}
+  .defect.fatrow{border-color:var(--accent2);border-style:dashed;}
+  .defect.fatrow .dnum{border-color:var(--accent2);color:var(--accent);}
+  .iso6520{font-size:9.5px;color:#6d7458;letter-spacing:.5px;margin-top:8px;}
+  footer{padding:20px 16px calc(30px + env(safe-area-inset-bottom));color:#5a6047;font-size:10.5px;text-align:center;line-height:1.6;}
+  footer b{color:var(--muted);}
+  .author{color:var(--accent2);font-weight:700;letter-spacing:.5px;margin-top:8px;font-size:11.5px;}
+  .disclaimer{background:#1b1f17;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;color:#8c9472;font-size:11px;line-height:1.55;}
+  .symbox{margin-top:4px;margin-bottom:18px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);}
+  .symhead{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:.3px;padding:14px;cursor:pointer;}
+  .symhead .chev{transition:.15s;color:var(--muted);font-size:14px;}
+  .symhead.open .chev{transform:rotate(90deg);}
+  .symbody{display:none;padding:0 14px 14px;border-top:1px solid var(--line);}
+  .symbody.open{display:block;}
+  .symtbl{width:100%;border-collapse:collapse;margin-top:10px;}
+  .symtbl td{padding:7px 8px;font-size:12px;border-bottom:1px dashed #2c331c;vertical-align:top;}
+  .symtbl td.sym{width:34px;font-weight:800;color:var(--accent);font-style:italic;font-size:14px;}
+  .symdef{margin-top:14px;}
+  .symdef h4{font-size:12px;color:var(--accent);margin:0 0 6px;letter-spacing:.5px;text-transform:uppercase;}
+  .symdef p{font-size:11.5px;color:#aeb795;line-height:1.55;margin:0 0 8px;}
+  .badge{display:inline-block;font-size:9px;letter-spacing:1px;padding:2px 6px;border-radius:5px;border:1px solid var(--line);color:var(--muted);text-transform:uppercase;}
+  .sv-base{fill:#3a4226;stroke:#6d7458;stroke-width:1;}
+  .sv-weld{fill:#7fae00;stroke:#c6f000;stroke-width:1;}
+  .sv-dim{stroke:#ff6b5e;stroke-width:1.4;fill:none;}
+  .sv-txt{fill:#eef0e6;font-size:12px;font-family:sans-serif;font-style:italic;}
+  .sv-ang{stroke:#5fb0ff;stroke-width:1.4;fill:none;}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop">
+    <div>
+      <h1 id="ttl">WeldCheck</h1>
+      <div class="sub"><span id="stdline">DS/EN ISO 5817:2023</span> · <span id="ttlsub">overfladefejl</span></div>
+    </div>
+    <button class="langbtn" id="langbtn" onclick="toggleLang(event)"><span class="cd" id="langcode">DA</span> <span class="ar">▼</span></button>
+  </div>
+</header>
+<div class="langmenu" id="langmenu">
+  <button onclick="setLang('da')" data-l="da"><span class="lc">DA</span> Dansk</button>
+  <button onclick="setLang('en')" data-l="en"><span class="lc">EN</span> English</button>
+  <button onclick="setLang('de')" data-l="de"><span class="lc">DE</span> Deutsch</button>
+  <button onclick="setLang('pl')" data-l="pl"><span class="lc">PL</span> Polski</button>
+  <button onclick="setLang('ro')" data-l="ro"><span class="lc">RO</span> Română</button>
+  <button onclick="setLang('lt')" data-l="lt"><span class="lc">LT</span> Lietuvių</button>
+</div>
+
+<div class="wrap">
+  <p class="step-label" id="lblStep0">0 · Vælg standard</p>
+  <div class="card">
+    <div class="seg">
+      <button id="std-5817" class="on" onclick="setStandard('5817')">ISO 5817<span class="segsub" id="sub5817">stål, nikkel, titan</span></button>
+      <button id="std-10042" onclick="setStandard('10042')">ISO 10042<span class="segsub" id="sub10042">aluminium</span></button>
+    </div>
+  </div>
+  <p class="step-label" id="lblStep1">1 · Vælg kvalitetsniveau</p>
+  <div class="card">
+    <div class="levels">
+      <div class="lvl" data-l="D" onclick="setLevel('D')"><div class="big">D</div><div class="desc" id="descD">Moderat</div></div>
+      <div class="lvl" data-l="C" onclick="setLevel('C')"><div class="big">C</div><div class="desc" id="descC">Mellem</div></div>
+      <div class="lvl on" data-l="B" onclick="setLevel('B')"><div class="big">B</div><div class="desc" id="descB">Højest</div></div>
+    </div>
+    <div class="fatwrap">
+      <div class="fattop">
+        <div>
+          <div class="fatttl" id="fatTtl">Udmattelse (Anneks B)</div>
+          <div class="fatsub" id="fatSub">Yderligere FAT-kriterier</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="fatToggle" onchange="setFat(this.checked)"><span class="track"></span></label>
+      </div>
+      <div class="fatlevels" id="fatLevels">
+        <button class="fatbtn on" data-f="C63" onclick="setFatLevel('C63')">C63</button>
+        <button class="fatbtn" data-f="B90" onclick="setFatLevel('B90')">B90</button>
+        <button class="fatbtn" data-f="B125" onclick="setFatLevel('B125')">B125</button>
+      </div>
+      <div class="fatnote" id="fatNote"></div>
+    </div>
+  </div>
+
+  <p class="step-label" id="lblStep2">2 · Indtast mål</p>
+  <div class="card">
+    <div class="field">
+      <label id="lblWeld">Samlingstype</label>
+      <div class="seg">
+        <button id="seg-butt" class="on" onclick="setWeld('butt')">Stumpsøm</button>
+        <button id="seg-fillet" onclick="setWeld('fillet')">Kantsøm</button>
+      </div>
+    </div>
+    <div class="field">
+      <label id="lblT">Pladetykkelse — t</label>
+      <div class="inrow"><input type="number" id="t" inputmode="decimal" value="10" min="0.5" step="0.5" oninput="render()"><span class="unit">mm</span></div>
+      <div class="hint" id="hintT">Mindste godstykkelse i samlingen (≥ 0,5 mm)</div>
+    </div>
+    <div class="field">
+      <label id="lblSA">Sømtykkelse — s</label>
+      <div class="inrow"><input type="number" id="sa" inputmode="decimal" value="10" min="0.5" step="0.5" oninput="render()"><span class="unit">mm</span></div>
+      <div class="hint" id="hintSA">Stumpsøm: nominel tykkelse s (= t ved fuld gennemsvejsning)</div>
+      <div class="amaal-note" id="amaalNote"></div>
+    </div>
+    <div class="field">
+      <label id="lblB">Sømbredde — b <span class="badge" id="optB">valgfri</span></label>
+      <div class="inrow"><input type="number" id="b" inputmode="decimal" value="" placeholder="8" min="0" step="0.5" oninput="render()"><span class="unit">mm</span></div>
+      <div class="hint" id="hintB">Nødvendig for overvulst, gennemløb m.fl.</div>
+    </div>
+  </div>
+
+  <p class="step-label" id="lblStep3">3 · Gyldighedsområde (synlige fejl)</p>
+  <div id="results"></div>
+
+  <div class="symbox">
+    <button class="symhead" id="symHead" onclick="toggleSym()">
+      <span id="symTitle">Symboler & definitioner</span>
+      <span class="chev" id="symChev">▶</span>
+    </button>
+    <div class="symbody" id="symBody"></div>
+  </div>
+
+  <div class="disclaimer" id="disc"></div>
+</div>
+
+<footer>
+  <div class="author">Martin Bernt Christoffersen</div>
+</footer>
+
+<!-- Floating contact button -->
+<button class="fab" id="fab" onclick="openContact()" aria-label="Kontakt">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#11140f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 4h16v12H5.2L4 17.2V4z"/><path d="M8 9h8M8 12.5h5"/>
+  </svg>
+</button>
+
+<div class="contact-overlay" id="contactOverlay" onclick="if(event.target===this)closeContact()">
+  <div class="contact-sheet">
+    <h3 id="cTitle">Kontakt</h3>
+    <p id="cBody">Spørgsmål, fejl eller forslag til værktøjet? Skriv gerne.</p>
+    <div class="who">Martin Bernt Christoffersen</div>
+    <a class="cbtn" id="cMail" href="#" onclick="this.href=mailHref();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#11140f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+      <span id="cMailTxt">Send e-mail</span>
+    </a>
+    <button class="closeb" id="cClose" onclick="closeContact()">Luk</button>
+  </div>
+</div>
+
+<!-- Install button (Android/desktop) -->
+<button class="installbtn" id="installBtn" onclick="doInstall()" style="display:none;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#11140f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+  <span id="installTxt">Installér app</span>
+</button>
+
+<!-- iOS add-to-home hint -->
+<div class="ios-hint" id="iosHint" style="display:none;">
+  <button class="ios-x" onclick="dismissIosHint()" aria-label="Luk">×</button>
+  <div class="ios-hint-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#c6f000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>
+    <span id="iosHintTxt">Tip: tryk Del-knappen og vælg "Føj til hjemmeskærm" for at installere WeldCheck.</span>
+  </div>
+</div>
+
+<script>
+const I = {
+  da:{flag:'🇩🇰',code:'DA',ttl:'Visuel svejsekontrol',ttlsub:'overfladefejl',
+    step1:'1 · Vælg kvalitetsniveau',step2:'2 · Indtast mål',step3:'3 · Gyldighedsområde (synlige fejl)',
+    dDesc:'Moderat',cDesc:'Mellem',bDesc:'Højest',
+    weld:'Samlingstype',butt:'Stumpsøm',fillet:'Kantsøm',
+    tLbl:'Pladetykkelse — t',tHint:'Mindste godstykkelse i samlingen (≥ 0,5 mm)',
+    saButt:'Sømtykkelse — s',saFillet:'A-mål — a (aA)',
+    saHintButt:'Stumpsøm: nominel tykkelse s (= t ved fuld gennemsvejsning)',
+    saHintFillet:'Kantsøm: halsmålet a (aA). Dette er IKKE pladetykkelsen t.',
+    amaal:'A-målet (a) er kantsømmens halsmål — den korteste afstand fra rodhjørnet til sømoverfladen. Det er typisk mindre end pladetykkelsen t og bruges til pore- og a-målsgrænser.',
+    bLbl:'Sømbredde — b',bOpt:'valgfri',bHint:'Nødvendig for overvulst, gennemløb m.fl.',
+    notAllowed:'Ikke tilladt',allowed:'Tilladt',cond:'Betinget',
+    maxLbl:'Maks.',minAngle:'Min. vinkel',forLevel:'Kvalitetsniveau',
+    enterB:'Indtast sømbredde b',
+    disc:'Værktøjet dækker <b>kun visuelt kontrollerbare overfladefejl</b> fra Tabel 1. Indre fejl (bindingsfejl mellem strenge, indeslutninger, volumenporøsitet, mikrofejl m.fl.) kræver NDT og er udeladt med vilje. Beregningerne er vejledende — gældende standard er altid den autoritative kilde.',
+    cTitle:'Kontakt',cBody:'Spørgsmål, fejl eller forslag til værktøjet? Skriv gerne.',cMail:'Send e-mail',cClose:'Luk',installTxt:'Installér app',iosHintTxt:'Tip: tryk Del-knappen og vælg "Føj til hjemmeskærm" for at installere WeldCheck.',ttlsubAl:'overfladefejl (alu)',sub5817:'stål, nikkel, titan',sub10042:'aluminium',step0:'0 · Vælg standard',fatTtl:'Udmattelse (Anneks B)',fatSub:'Yderligere FAT-kriterier',fatApplied:'FAT-kriterium anvendt:',fatNoteBase:'Yderligere kriterier for udmattelsespåvirkede svejsninger. Bygger oven på niveau B/C. Hvor intet ekstra er angivet, gælder basisværdien.',fatNoteFillet:'Kantsømme er undtaget fra B125.',fatToeRadius:'Overgangsradius (udmattelse)',fatAngular:'Vinkelknæk β'},
+  en:{flag:'🇬🇧',code:'EN',ttl:'Visual weld inspection',ttlsub:'surface imperfections',
+    step1:'1 · Select quality level',step2:'2 · Enter dimensions',step3:'3 · Acceptance limits (visible defects)',
+    dDesc:'Moderate',cDesc:'Intermediate',bDesc:'Stringent',
+    weld:'Joint type',butt:'Butt weld',fillet:'Fillet weld',
+    tLbl:'Plate thickness — t',tHint:'Smallest material thickness in the joint (≥ 0.5 mm)',
+    saButt:'Weld thickness — s',saFillet:'Throat thickness — a (aA)',
+    saHintButt:'Butt weld: nominal thickness s (= t for full penetration)',
+    saHintFillet:'Fillet weld: throat thickness a (aA). This is NOT plate thickness t.',
+    amaal:'The throat thickness (a) is the fillet weld throat — the shortest distance from the root corner to the weld face. It is usually smaller than plate thickness t and is used for pore and throat limits.',
+    bLbl:'Weld width — b',bOpt:'optional',bHint:'Required for excess weld metal, excessive penetration etc.',
+    notAllowed:'Not permitted',allowed:'Permitted',cond:'Conditional',
+    maxLbl:'Max.',minAngle:'Min. angle',forLevel:'Quality level',
+    enterB:'Enter weld width b',
+    disc:'This tool covers <b>only visually detectable surface imperfections</b> from Table 1. Internal imperfections (inter-run lack of fusion, inclusions, volume porosity, micro defects etc.) require NDT and are intentionally omitted. Values are indicative — the applicable standard is always authoritative.',
+    cTitle:'Contact',cBody:'Questions, errors or suggestions for the tool? Feel free to write.',cMail:'Send e-mail',cClose:'Close',installTxt:'Install app',iosHintTxt:'Tip: tap the Share button and choose "Add to Home Screen" to install WeldCheck.',ttlsubAl:'surface imperfections (alu)',sub5817:'steel, nickel, titanium',sub10042:'aluminium',step0:'0 · Select standard',fatTtl:'Fatigue (Annex B)',fatSub:'Additional FAT criteria',fatApplied:'FAT criterion applied:',fatNoteBase:'Additional criteria for welds subject to fatigue. Builds on level B/C. Where no extra value is given, the base value applies.',fatNoteFillet:'Fillet welds are excluded from B125.',fatToeRadius:'Weld toe radius (fatigue)',fatAngular:'Angular misalignment β'},
+  de:{flag:'🇩🇪',code:'DE',ttl:'Visuelle Schweißnahtprüfung',ttlsub:'Oberflächenfehler',
+    step1:'1 · Bewertungsgruppe wählen',step2:'2 · Maße eingeben',step3:'3 · Grenzwerte (sichtbare Fehler)',
+    dDesc:'Moderat',cDesc:'Mittel',bDesc:'Höchste',
+    weld:'Stoßart',butt:'Stumpfnaht',fillet:'Kehlnaht',
+    tLbl:'Blechdicke — t',tHint:'Kleinste Materialdicke in der Verbindung (≥ 0,5 mm)',
+    saButt:'Nahtdicke — s',saFillet:'a-Maß — a (aA)',
+    saHintButt:'Stumpfnaht: Nenndicke s (= t bei voller Durchschweißung)',
+    saHintFillet:'Kehlnaht: a-Maß a (aA). Dies ist NICHT die Blechdicke t.',
+    amaal:'Das a-Maß (a) ist die Nahtdicke der Kehlnaht — der kürzeste Abstand von der Wurzelecke zur Nahtoberfläche. Es ist meist kleiner als die Blechdicke t und wird für Poren- und a-Maß-Grenzen verwendet.',
+    bLbl:'Nahtbreite — b',bOpt:'optional',bHint:'Erforderlich für Nahtüberhöhung, Durchschweißung usw.',
+    notAllowed:'Nicht zulässig',allowed:'Zulässig',cond:'Bedingt',
+    maxLbl:'Max.',minAngle:'Min. Winkel',forLevel:'Bewertungsgruppe',
+    enterB:'Nahtbreite b eingeben',
+    disc:'Dieses Werkzeug umfasst <b>nur visuell erkennbare Oberflächenfehler</b> aus Tabelle 1. Innere Fehler (Bindefehler zwischen Lagen, Einschlüsse, Volumenporosität, Mikrofehler usw.) erfordern ZfP und sind bewusst ausgelassen. Die Werte sind Richtwerte — die geltende Norm ist immer maßgebend.',
+    cTitle:'Kontakt',cBody:'Fragen, Fehler oder Vorschläge zum Werkzeug? Schreiben Sie gerne.',cMail:'E-Mail senden',cClose:'Schließen',installTxt:'App installieren',iosHintTxt:'Tipp: Tippen Sie auf "Teilen" und wählen Sie "Zum Home-Bildschirm" um WeldCheck zu installieren.',ttlsubAl:'Oberflächenfehler (Alu)',sub5817:'Stahl, Nickel, Titan',sub10042:'Aluminium',step0:'0 · Norm wählen',fatTtl:'Ermüdung (Anhang B)',fatSub:'Zusätzliche FAT-Kriterien',fatApplied:'FAT-Kriterium angewendet:',fatNoteBase:'Zusätzliche Kriterien für schwingbeanspruchte Schweißnähte. Baut auf Gruppe B/C auf. Wo kein Zusatzwert angegeben ist, gilt der Basiswert.',fatNoteFillet:'Kehlnähte sind von B125 ausgeschlossen.',fatToeRadius:'Nahtübergangsradius (Ermüdung)',fatAngular:'Winkelversatz β'},
+  pl:{flag:'🇵🇱',code:'PL',ttl:'Wizualna kontrola spoin',ttlsub:'niezgodności powierzchniowe',
+    step1:'1 · Wybierz poziom jakości',step2:'2 · Wprowadź wymiary',step3:'3 · Granice akceptacji (widoczne wady)',
+    dDesc:'Umiarkowany',cDesc:'Średni',bDesc:'Najwyższy',
+    weld:'Typ złącza',butt:'Spoina czołowa',fillet:'Spoina pachwinowa',
+    tLbl:'Grubość blachy — t',tHint:'Najmniejsza grubość materiału w złączu (≥ 0,5 mm)',
+    saButt:'Grubość spoiny — s',saFillet:'Grubość — a (aA)',
+    saHintButt:'Spoina czołowa: grubość nominalna s (= t przy pełnym przetopie)',
+    saHintFillet:'Spoina pachwinowa: grubość a (aA). To NIE jest grubość blachy t.',
+    amaal:'Grubość a to grubość spoiny pachwinowej — najkrótsza odległość od narożnika grani do lica spoiny. Zwykle mniejsza niż grubość blachy t; używana do granic porów i grubości.',
+    bLbl:'Szerokość spoiny — b',bOpt:'opcjonalne',bHint:'Wymagane dla nadlewu, nadmiernego przetopu itp.',
+    notAllowed:'Niedozwolone',allowed:'Dozwolone',cond:'Warunkowo',
+    maxLbl:'Maks.',minAngle:'Min. kąt',forLevel:'Poziom jakości',
+    enterB:'Wprowadź szerokość spoiny b',
+    disc:'Narzędzie obejmuje <b>tylko widoczne niezgodności powierzchniowe</b> z Tablicy 1. Wady wewnętrzne (brak przetopu między ściegami, wtrącenia, porowatość objętościowa, mikrowady itp.) wymagają badań NDT i zostały celowo pominięte. Wartości są orientacyjne — obowiązująca norma jest zawsze wiążąca.',
+    cTitle:'Kontakt',cBody:'Pytania, błędy lub sugestie dotyczące narzędzia? Napisz śmiało.',cMail:'Wyślij e-mail',cClose:'Zamknij',installTxt:'Zainstaluj aplikację',iosHintTxt:'Wskazówka: dotknij przycisku Udostępnij i wybierz "Do ekranu początkowego", aby zainstalować WeldCheck.',ttlsubAl:'niezgodności powierzchniowe (alu)',sub5817:'stal, nikiel, tytan',sub10042:'aluminium',step0:'0 · Wybierz normę',fatTtl:'Zmęczenie (Załącznik B)',fatSub:'Dodatkowe kryteria FAT',fatApplied:'Zastosowane kryterium FAT:',fatNoteBase:'Dodatkowe kryteria dla spoin obciążonych zmęczeniowo. Bazuje na poziomie B/C. Gdzie nie podano wartości dodatkowej, obowiązuje wartość bazowa.',fatNoteFillet:'Spoiny pachwinowe są wyłączone z B125.',fatToeRadius:'Promień przejścia (zmęczenie)',fatAngular:'Przesunięcie kątowe β'},
+  ro:{flag:'🇷🇴',code:'RO',ttl:'Control vizual al sudurilor',ttlsub:'imperfecțiuni de suprafață',
+    step1:'1 · Alege nivelul de calitate',step2:'2 · Introdu dimensiunile',step3:'3 · Limite de acceptare (defecte vizibile)',
+    dDesc:'Moderat',cDesc:'Mediu',bDesc:'Maxim',
+    weld:'Tip îmbinare',butt:'Sudură cap la cap',fillet:'Sudură de colț',
+    tLbl:'Grosimea tablei — t',tHint:'Cea mai mică grosime de material din îmbinare (≥ 0,5 mm)',
+    saButt:'Grosimea sudurii — s',saFillet:'Grosimea — a (aA)',
+    saHintButt:'Cap la cap: grosime nominală s (= t la pătrundere completă)',
+    saHintFillet:'Sudură de colț: grosimea a (aA). NU este grosimea tablei t.',
+    amaal:'Grosimea a este grosimea sudurii de colț — distanța minimă de la colțul rădăcinii la fața sudurii. De obicei mai mică decât grosimea tablei t; folosită pentru limitele porilor și grosimii.',
+    bLbl:'Lățimea sudurii — b',bOpt:'opțional',bHint:'Necesar pentru supraînălțare, pătrundere excesivă etc.',
+    notAllowed:'Nepermis',allowed:'Permis',cond:'Condiționat',
+    maxLbl:'Max.',minAngle:'Unghi min.',forLevel:'Nivel de calitate',
+    enterB:'Introdu lățimea sudurii b',
+    disc:'Instrumentul acoperă <b>numai imperfecțiunile de suprafață vizibile</b> din Tabelul 1. Defectele interne (lipsă de topire între treceri, incluziuni, porozitate de volum, micro-defecte etc.) necesită examinări NDT și sunt omise intenționat. Valorile sunt orientative — standardul aplicabil este întotdeauna autoritatea.',
+    cTitle:'Contact',cBody:'Întrebări, erori sau sugestii pentru instrument? Scrieți cu încredere.',cMail:'Trimite e-mail',cClose:'Închide',installTxt:'Instalează aplicația',iosHintTxt:'Sfat: apăsați butonul Partajare și alegeți "Adăugare la ecranul principal" pentru a instala WeldCheck.',ttlsubAl:'imperfecțiuni de suprafață (alu)',sub5817:'oțel, nichel, titan',sub10042:'aluminiu',step0:'0 · Alege standardul',fatTtl:'Oboseală (Anexa B)',fatSub:'Criterii FAT suplimentare',fatApplied:'Criteriu FAT aplicat:',fatNoteBase:'Criterii suplimentare pentru suduri solicitate la oboseală. Se bazează pe nivelul B/C. Unde nu este dată o valoare suplimentară, se aplică valoarea de bază.',fatNoteFillet:'Sudurile de colț sunt excluse din B125.',fatToeRadius:'Raza de racordare (oboseală)',fatAngular:'Dezaxare unghiulară β'},
+  lt:{flag:'🇱🇹',code:'LT',ttl:'Vizualinė suvirinimo kontrolė',ttlsub:'paviršiaus defektai',
+    step1:'1 · Pasirinkite kokybės lygį',step2:'2 · Įveskite matmenis',step3:'3 · Priimtinumo ribos (matomi defektai)',
+    dDesc:'Vidutinis',cDesc:'Vidutinis+',bDesc:'Aukščiausias',
+    weld:'Jungties tipas',butt:'Sandūrinė siūlė',fillet:'Kampinė siūlė',
+    tLbl:'Plokštės storis — t',tHint:'Mažiausias medžiagos storis jungtyje (≥ 0,5 mm)',
+    saButt:'Siūlės storis — s',saFillet:'Storis — a (aA)',
+    saHintButt:'Sandūrinė: nominalus storis s (= t esant pilnam provirimui)',
+    saHintFillet:'Kampinė siūlė: storis a (aA). Tai NĖRA plokštės storis t.',
+    amaal:'Storis a yra kampinės siūlės kaklelis — trumpiausias atstumas nuo šaknies kampo iki siūlės paviršiaus. Paprastai mažesnis nei plokštės storis t; naudojamas porų ir storio riboms.',
+    bLbl:'Siūlės plotis — b',bOpt:'pasirinktinai',bHint:'Reikalingas pertekliniam metalui, perdideliam provirimui ir kt.',
+    notAllowed:'Neleidžiama',allowed:'Leidžiama',cond:'Sąlyginai',
+    maxLbl:'Maks.',minAngle:'Min. kampas',forLevel:'Kokybės lygis',
+    enterB:'Įveskite siūlės plotį b',
+    disc:'Įrankis apima <b>tik vizualiai matomus paviršiaus defektus</b> iš 1 lentelės. Vidiniai defektai (nesutirpimas tarp sluoksnių, intarpai, tūrinis poringumas, mikrodefektai ir kt.) reikalauja NDT ir sąmoningai praleisti. Reikšmės yra orientacinės — galiojantis standartas visada yra autoritetas.',
+    cTitle:'Kontaktai',cBody:'Klausimai, klaidos ar pasiūlymai dėl įrankio? Drąsiai rašykite.',cMail:'Siųsti el. laišką',cClose:'Uždaryti',installTxt:'Įdiegti programą',iosHintTxt:'Patarimas: bakstelėkite Bendrinti ir pasirinkite "Įtraukti į pagrindinį ekraną", kad įdiegtumėte WeldCheck.',ttlsubAl:'paviršiaus defektai (alu)',sub5817:'plienas, nikelis, titanas',sub10042:'aliuminis',step0:'0 · Pasirinkite standartą',fatTtl:'Nuovargis (B priedas)',fatSub:'Papildomi FAT kriterijai',fatApplied:'Pritaikytas FAT kriterijus:',fatNoteBase:'Papildomi kriterijai nuovargio veikiamoms siūlėms. Remiasi B/C lygiu. Kur papildoma vertė nenurodyta, taikoma bazinė vertė.',fatNoteFillet:'Kampinės siūlės neįtraukiamos į B125.',fatToeRadius:'Perėjimo spindulys (nuovargis)',fatAngular:'Kampinis poslinkis β'}
+};
+
+const SYM = {
+  da:{title:'Symboler & definitioner',shortTtl:'Korte fejl',
+    rows:[['a','Nominelt a-mål i en kantsøm'],['aA','Faktisk a-mål (på den færdige svejsesøm)'],['s','Nominel stumpsømtykkelse'],['b','Overvulstens bredde'],['t','Væg- eller pladetykkelse (nominel)'],['d','Gasporediameter'],['z','Benlængde i en kantsøm'],['h','Fejlens højde eller bredde'],['l','Fejlens længde i svejsningens længderetning'],['α','Vinkel mellem grundmateriale og svejsesøm'],['β','Vinkelknæk']],
+    short100:'Svejsninger ≥ 100 mm: en fejl regnes som kort, hvis dens totale længde ikke overstiger 25 mm inden for de 100 mm, der indeholder flest fejl.',
+    shortLt:'Svejsninger < 100 mm: en fejl regnes som kort, hvis dens totale længde ikke overstiger 25 % af svejsningens længde.'},
+  en:{title:'Symbols & definitions',shortTtl:'Short imperfections',
+    rows:[['a','Nominal throat thickness of a fillet weld'],['aA','Actual throat thickness (of the finished weld)'],['s','Nominal butt weld thickness'],['b','Width of weld reinforcement'],['t','Wall or plate thickness (nominal)'],['d','Diameter of gas pore'],['z','Leg length of a fillet weld'],['h','Height or width of imperfection'],['l','Length of imperfection along the weld'],['α','Angle of weld toe'],['β','Angular misalignment']],
+    short100:'Welds ≥ 100 mm: an imperfection is short if its total length does not exceed 25 mm within the 100 mm containing the greatest number of imperfections.',
+    shortLt:'Welds < 100 mm: an imperfection is short if its total length does not exceed 25 % of the weld length.'},
+  de:{title:'Symbole & Definitionen',shortTtl:'Kurze Fehler',
+    rows:[['a','Nenn-a-Maß einer Kehlnaht'],['aA','Ist-a-Maß (der fertigen Naht)'],['s','Nenndicke der Stumpfnaht'],['b','Breite der Nahtüberhöhung'],['t','Wand- oder Blechdicke (nominal)'],['d','Durchmesser einer Gaspore'],['z','Schenkellänge einer Kehlnaht'],['h','Höhe oder Breite des Fehlers'],['l','Länge des Fehlers längs der Naht'],['α','Nahtübergangswinkel'],['β','Winkelversatz']],
+    short100:'Nähte ≥ 100 mm: ein Fehler gilt als kurz, wenn seine Gesamtlänge 25 mm innerhalb der 100 mm mit den meisten Fehlern nicht überschreitet.',
+    shortLt:'Nähte < 100 mm: ein Fehler gilt als kurz, wenn seine Gesamtlänge 25 % der Nahtlänge nicht überschreitet.'},
+  pl:{title:'Symbole i definicje',shortTtl:'Wady krótkie',
+    rows:[['a','Nominalna grubość spoiny pachwinowej'],['aA','Rzeczywista grubość spoiny (gotowej)'],['s','Nominalna grubość spoiny czołowej'],['b','Szerokość nadlewu'],['t','Grubość ścianki lub blachy (nominalna)'],['d','Średnica poru gazowego'],['z','Długość ramienia spoiny pachwinowej'],['h','Wysokość lub szerokość wady'],['l','Długość wady wzdłuż spoiny'],['α','Kąt przejścia lica'],['β','Przesunięcie kątowe']],
+    short100:'Spoiny ≥ 100 mm: wada jest krótka, jeśli jej łączna długość nie przekracza 25 mm w obrębie 100 mm zawierających najwięcej wad.',
+    shortLt:'Spoiny < 100 mm: wada jest krótka, jeśli jej łączna długość nie przekracza 25 % długości spoiny.'},
+  ro:{title:'Simboluri și definiții',shortTtl:'Defecte scurte',
+    rows:[['a','Grosimea nominală a sudurii de colț'],['aA','Grosimea reală (a sudurii finite)'],['s','Grosimea nominală a sudurii cap la cap'],['b','Lățimea supraînălțării'],['t','Grosimea peretelui sau tablei (nominală)'],['d','Diametrul unui por de gaz'],['z','Lungimea catetei sudurii de colț'],['h','Înălțimea sau lățimea defectului'],['l','Lungimea defectului în lungul sudurii'],['α','Unghiul de racordare'],['β','Dezaxare unghiulară']],
+    short100:'Suduri ≥ 100 mm: un defect este scurt dacă lungimea sa totală nu depășește 25 mm în cele 100 mm cu cele mai multe defecte.',
+    shortLt:'Suduri < 100 mm: un defect este scurt dacă lungimea sa totală nu depășește 25 % din lungimea sudurii.'},
+  lt:{title:'Simboliai ir apibrėžimai',shortTtl:'Trumpi defektai',
+    rows:[['a','Nominalus kampinės siūlės storis'],['aA','Faktinis storis (baigtos siūlės)'],['s','Nominalus sandūrinės siūlės storis'],['b','Siūlės iškilimo plotis'],['t','Sienelės ar plokštės storis (nominalus)'],['d','Dujų poros skersmuo'],['z','Kampinės siūlės katetės ilgis'],['h','Defekto aukštis arba plotis'],['l','Defekto ilgis išilgai siūlės'],['α','Perėjimo kampas'],['β','Kampinis poslinkis']],
+    short100:'Siūlės ≥ 100 mm: defektas laikomas trumpu, jei jo bendras ilgis neviršija 25 mm 100 mm ruože, kuriame daugiausia defektų.',
+    shortLt:'Siūlės < 100 mm: defektas laikomas trumpu, jei jo bendras ilgis neviršija 25 % siūlės ilgio.'}
+};
+
+const NAMES = {
+  '1.1100':{da:'Revne',en:'Crack',de:'Riss',pl:'Pęknięcie',ro:'Fisură',lt:'Įtrūkimas'},
+  '1.2104':{da:'Kraterrevne',en:'Crater crack',de:'Endkraterriss',pl:'Pęknięcie krateru',ro:'Fisură de crater',lt:'Kraterio įtrūkimas'},
+  '1.32017':{da:'Overfladepore',en:'Surface pore',de:'Oberflächenpore',pl:'Por powierzchniowy',ro:'Por de suprafață',lt:'Paviršiaus pora'},
+  '1.42025':{da:'Åben kraterpore',en:'End crater pipe',de:'Offene Endkraterpore',pl:'Jama krateru',ro:'Retasură de crater',lt:'Kraterio kanalas'},
+  '1.64021':{da:'Rodfejl (mangl. gennemsvejsning)',en:'Incomplete root penetration',de:'Wurzelfehler (ungenügende Durchschweißung)',pl:'Brak przetopu grani',ro:'Lipsă pătrundere la rădăcină',lt:'Nepilnas šaknies provirimas'},
+  '1.75011/5012':{da:'Sidekærv',en:'Undercut',de:'Einbrandkerbe',pl:'Podtopienie',ro:'Crestătură marginală',lt:'Paplovimas'},
+  '1.85013':{da:'Krympefuge (rodkærv)',en:'Shrinkage groove',de:'Schrumpfkerbe (Wurzelkerbe)',pl:'Wklęśnięcie grani',ro:'Canal de contracție',lt:'Šaknies griovelis'},
+  '1.9502':{da:'Overvulst (stumpsøm)',en:'Excess weld metal (butt)',de:'Nahtüberhöhung (Stumpfnaht)',pl:'Nadlew (czołowa)',ro:'Supraînălțare (cap la cap)',lt:'Perteklinis metalas (sandūrinė)'},
+  '1.10503':{da:'Konveks sømoverflade (kantsøm)',en:'Excessive convexity (fillet)',de:'Übermäßige Wölbung (Kehlnaht)',pl:'Nadmierna wypukłość (pachwinowa)',ro:'Convexitate excesivă (colț)',lt:'Perteklinis išgaubtumas (kampinė)'},
+  '1.11504':{da:'Gennemløb',en:'Excessive penetration',de:'Durchschweißung',pl:'Nadmierny przetop',ro:'Pătrundere excesivă',lt:'Perteklinis provirimas'},
+  '1.12505':{da:'Forkert overgang (vinkel α)',en:'Incorrect weld toe (angle α)',de:'Ungünstiger Nahtübergang (Winkel α)',pl:'Niewłaściwe przejście (kąt α)',ro:'Racordare incorectă (unghi α)',lt:'Netinkamas perėjimas (kampas α)'},
+  '1.13506':{da:'Overløb af svejsemetal',en:'Overlap',de:'Überlappung',pl:'Zachodzenie lica',ro:'Suprapunere',lt:'Užliejimas'},
+  '1.14509':{da:'Nedløbet svejsemetal',en:'Sagging',de:'Durchhang',pl:'Obwiśnięcie',ro:'Curgere',lt:'Nuvarvėjimas'},
+  '1.15510':{da:'Gennembrænding',en:'Burn through',de:'Durchbrand',pl:'Przepalenie',ro:'Străpungere',lt:'Prisvilinimas'},
+  '1.16512':{da:'Ulige store katetre (kantsøm)',en:'Excessive asymmetry of fillet',de:'Ungleiche Schenkellängen (Kehlnaht)',pl:'Nierówne ramiona (pachwinowa)',ro:'Asimetrie excesivă (colț)',lt:'Nelygūs katetai (kampinė)'},
+  '1.17515':{da:'Indadhvælving i roden',en:'Root concavity',de:'Wurzelrückfall',pl:'Wklęśnięcie grani',ro:'Concavitate la rădăcină',lt:'Šaknies įgaubtumas'},
+  '1.18516':{da:'Porøsitet i rodvulst',en:'Root porosity',de:'Wurzelporosität',pl:'Porowatość grani',ro:'Porozitate la rădăcină',lt:'Šaknies poringumas'},
+  '1.19517':{da:'Fejl ved genstart',en:'Poor restart',de:'Schlechter Wiederanlauf',pl:'Zły ponowny start',ro:'Reluare defectuoasă',lt:'Blogas perstartavimas'},
+  '1.205213':{da:'Utilstrækkeligt a-mål',en:'Insufficient throat thickness',de:'Zu geringes a-Maß',pl:'Za mała grubość spoiny',ro:'Grosime insuficientă',lt:'Nepakankamas storis'},
+  '1.215214':{da:'Uforholdsmæssigt stort a-mål',en:'Excessive throat thickness',de:'Zu großes a-Maß',pl:'Za duża grubość spoiny',ro:'Grosime excesivă',lt:'Perdidelis storis'},
+  '1.22601':{da:'Tændsår',en:'Stray arc',de:'Zündstelle',pl:'Zajarzenie łuku',ro:'Amorsare accidentală',lt:'Lankinis pažeidimas'},
+  '1.23602':{da:'Sprøjt',en:'Spatter',de:'Spritzer',pl:'Odpryski',ro:'Stropi',lt:'Tiškalai'},
+  '1.24610':{da:'Anløbsfarver (oxidfilm)',en:'Temper colours',de:'Anlauffarben (Oxidfilm)',pl:'Naloty (tlenki)',ro:'Culori de revenire',lt:'Oksidacijos spalvos'},
+  '3.15071':{da:'Forsætning mellem plader',en:'Linear misalignment (plates)',de:'Kantenversatz (Bleche)',pl:'Przesunięcie blach',ro:'Dezaxare (table)',lt:'Plokščių poslinkis'},
+  '3.15072':{da:'Forsætning mellem rør',en:'Linear misalignment (tubes)',de:'Kantenversatz (Rohre)',pl:'Przesunięcie rur',ro:'Dezaxare (țevi)',lt:'Vamzdžių poslinkis'},
+  '3.2617':{da:'Mangelfuld tilpasning af rodspalte',en:'Incorrect root gap (fillet)',de:'Falscher Wurzelspalt (Kehlnaht)',pl:'Niewłaściwy odstęp grani',ro:'Rost incorect la rădăcină',lt:'Netinkamas šaknies tarpas'}
+,
+  '1.32018':{da:'Overfladeporøsitet',en:'Surface porosity',de:'Oberflächenporosität',pl:'Porowatość powierzchniowa',ro:'Porozitate de suprafață',lt:'Paviršiaus poringumas'},
+  '1.62017':{da:'Overfladepore',en:'Surface pore',de:'Oberflächenpore',pl:'Por powierzchniowy',ro:'Por de suprafață',lt:'Paviršiaus pora'},
+  '1.72025':{da:'Åben kraterpore',en:'End crater pipe',de:'Offene Endkraterpore',pl:'Jama krateru',ro:'Retasură de crater',lt:'Kraterio kanalas'},
+  '1.94021':{da:'Rodfejl (mangl. gennemsvejsning)',en:'Incomplete root penetration',de:'Wurzelfehler',pl:'Brak przetopu grani',ro:'Lipsă pătrundere la rădăcină',lt:'Nepilnas šaknies provirimas'},
+  '1.105011/5012':{da:'Sidekærv',en:'Undercut',de:'Einbrandkerbe',pl:'Podtopienie',ro:'Crestătură marginală',lt:'Paplovimas'},
+  '1.11502':{da:'Overvulst',en:'Excess weld metal',de:'Nahtüberhöhung',pl:'Nadlew',ro:'Supraînălțare',lt:'Perteklinis metalas'},
+  '1.12503':{da:'Konveks sømoverflade',en:'Excessive convexity',de:'Übermäßige Wölbung',pl:'Nadmierna wypukłość',ro:'Convexitate excesivă',lt:'Perteklinis išgaubtumas'},
+  '1.135213':{da:'Utilstrækkeligt a-mål',en:'Insufficient throat',de:'Zu geringes a-Maß',pl:'Za mała grubość',ro:'Grosime insuficientă',lt:'Nepakankamas storis'},
+  '1.14504':{da:'Gennemløb',en:'Excess penetration',de:'Durchschweißung',pl:'Nadmierny przetop',ro:'Pătrundere excesivă',lt:'Perteklinis provirimas'},
+  '1.15506':{da:'Overløb',en:'Overlap',de:'Überlappung',pl:'Zachodzenie lica',ro:'Suprapunere',lt:'Užliejimas'},
+  '1.16509/511':{da:'Nedløb / mangelfuld opfyldning',en:'Sagging / incompletely filled',de:'Durchhang / ungenügende Füllung',pl:'Obwiśnięcie / niewypełnienie',ro:'Curgere / neumplere',lt:'Nuvarvėjimas / nepilnas užpildymas'},
+  '1.17512':{da:'Ulige store katetre',en:'Excessive asymmetry of fillet',de:'Ungleiche Schenkellängen',pl:'Nierówne ramiona',ro:'Asimetrie excesivă',lt:'Nelygūs katetai'},
+  '1.18515':{da:'Indadhvælving i roden',en:'Root concavity',de:'Wurzelrückfall',pl:'Wklęśnięcie grani',ro:'Concavitate la rădăcină',lt:'Šaknies įgaubtumas'},
+  '1.20601':{da:'Tændsår',en:'Stray arc',de:'Zündstelle',pl:'Zajarzenie łuku',ro:'Amorsare accidentală',lt:'Lankinis pažeidimas'},
+  '1.21602':{da:'Sprøjt',en:'Spatter',de:'Spritzer',pl:'Odpryski',ro:'Stropi',lt:'Tiškalai'}};
+
+const TXT = {
+  alwaysNo:{da:'Aldrig tilladt i noget niveau.',en:'Never permitted at any level.',de:'In keiner Gruppe zulässig.',pl:'Nigdy niedozwolone.',ro:'Niciodată permis.',lt:'Niekada neleidžiama.'},
+  poreNote:{da:'På svejseoverflade eller rod. Mål for én enkelt pore.',en:'On weld face or root. Limit for a single pore.',de:'An Nahtoberfläche oder Wurzel. Grenzwert für eine einzelne Pore.',pl:'Na licu lub grani. Wymiar pojedynczego poru.',ro:'Pe fața sau rădăcina sudurii. Limită pentru un por.',lt:'Ant siūlės paviršiaus ar šaknies. Vienos poros riba.'},
+  rootSingle:{da:'Kun for ensidige stumpsømme med fuld gennemsvejsning.',en:'Only for single-side butt welds, full penetration.',de:'Nur für einseitige Stumpfnähte mit voller Durchschweißung.',pl:'Tylko jednostronne spoiny czołowe z pełnym przetopem.',ro:'Doar suduri cap la cap pe o parte, pătrundere completă.',lt:'Tik vienpusėms sandūrinėms siūlėms su pilnu provirimu.'},
+  toeNote:{da:'Gælder ikke for roden.',en:'Not applicable for the root.',de:'Nicht für die Wurzel anwendbar.',pl:'Nie dotyczy grani.',ro:'Nu se aplică rădăcinii.',lt:'Netaikoma šakniai.'},
+  asymNote:{da:'Når asymmetrisk kantsøm ikke er foreskrevet.',en:'When asymmetric fillet weld is not prescribed.',de:'Wenn keine asymmetrische Kehlnaht vorgeschrieben ist.',pl:'Gdy spoina asymetryczna nie jest przepisana.',ro:'Când sudura asimetrică nu este prescrisă.',lt:'Kai asimetrinė siūlė nenurodyta.'},
+  throatNote:{da:'Gælder ikke for processer med bevist større indtrængning.',en:'Not for processes with proven greater penetration.',de:'Nicht für Prozesse mit nachgewiesener größerer Einbrandtiefe.',pl:'Nie dla procesów z udowodnionym głębszym wtopieniem.',ro:'Nu pentru procese cu pătrundere dovedită mai mare.',lt:'Netaikoma procesams su įrodytu didesniu provirimu.'},
+  appDep:{da:'Accept afhænger af anvendelse (materiale, korrosionsbeskyttelse).',en:'Acceptance depends on application (material, corrosion protection).',de:'Annahme hängt von der Anwendung ab (Werkstoff, Korrosionsschutz).',pl:'Akceptacja zależy od zastosowania (materiał, ochrona).',ro:'Acceptarea depinde de aplicație (material, protecție).',lt:'Priimtinumas priklauso nuo taikymo (medžiaga, apsauga).'},
+  strayOK:{da:'Tilladt hvis grundmetallets egenskaber ikke påvirkes.',en:'Permitted if parent metal properties are unaffected.',de:'Zulässig, wenn die Eigenschaften des Grundwerkstoffs nicht beeinträchtigt werden.',pl:'Dozwolone, jeśli właściwości materiału nie są naruszone.',ro:'Permis dacă proprietățile metalului de bază nu sunt afectate.',lt:'Leidžiama, jei pagrindo metalo savybės nepaveiktos.'},
+  restart:{da:'Tilladt — grænse afhænger af fejltypen ved genstart.',en:'Permitted — limit depends on the defect type at restart.',de:'Zulässig — Grenze hängt vom Fehlertyp beim Wiederanlauf ab.',pl:'Dozwolone — granica zależy od typu wady.',ro:'Permis — limita depinde de tipul defectului.',lt:'Leidžiama — riba priklauso nuo defekto tipo.'},
+  plateNote:{da:'t = mindste tykkelse. Langsgående sømme i plader/hulprofiler.',en:'t = smaller thickness. Longitudinal welds in plates/hollow sections.',de:'t = kleinste Dicke. Längsnähte in Blechen/Hohlprofilen.',pl:'t = mniejsza grubość. Spoiny wzdłużne w blachach/profilach.',ro:'t = grosimea mai mică. Suduri longitudinale în table/profile.',lt:'t = mažesnis storis. Išilginės siūlės plokštėse/profiliuose.'},
+  tubeNote:{da:'Rundsømme i rør og hulprofiler.',en:'Circumferential welds in tubes and hollow sections.',de:'Rundnähte in Rohren und Hohlprofilen.',pl:'Spoiny obwodowe w rurach i profilach.',ro:'Suduri circumferențiale în țevi și profile.',lt:'Apskritiminės siūlės vamzdžiuose ir profiliuose.'},
+  filletToe:{da:'Kantsøm: α₁ og α₂ ≥ α.',en:'Fillet: α₁ and α₂ ≥ α.',de:'Kehlnaht: α₁ und α₂ ≥ α.',pl:'Pachwinowa: α₁ i α₂ ≥ α.',ro:'Colț: α₁ și α₂ ≥ α.',lt:'Kampinė: α₁ ir α₂ ≥ α.'}
+};
+
+let LANG='da', LEVEL='B', WELD='butt';
+let FAT=false, FATLVL='C63';
+let STANDARD='5817'; // '5817' or '10042' (10042 has no Annex B / FAT)
+let openSet=new Set();
+
+function t(k){return I[LANG][k];}
+function nm(key){const o=NAMES[key];return o?o[LANG]:key;}
+function tx(key){const o=TXT[key];return o?o[LANG]:'';}
+
+function toggleLang(e){e.stopPropagation();
+  const m=document.getElementById('langmenu'),b=document.getElementById('langbtn');
+  const o=m.classList.toggle('open');b.classList.toggle('open',o);
+}
+document.addEventListener('click',()=>{document.getElementById('langmenu').classList.remove('open');document.getElementById('langbtn').classList.remove('open');});
+
+/* ---- contact (obfuscated e-mail; not stored as plain text) ---- */
+const _m=['check','weld'];
+function mailHref(){
+  // assembled at runtime to avoid plain-text scraping
+  const user=_m.join('');
+  const dom=['gmail','com'].join('.');
+  return 'mailto:'+user+'@'+dom+'?subject='+encodeURIComponent('WeldCheck – '+t('cTitle'));
+}
+function openContact(){document.getElementById('contactOverlay').classList.add('open');}
+function closeContact(){document.getElementById('contactOverlay').classList.remove('open');}
+function toggleSym(){
+  const h=document.getElementById('symHead'),bd=document.getElementById('symBody');
+  const o=!bd.classList.contains('open');
+  h.classList.toggle('open',o);bd.classList.toggle('open',o);
+}
+function buildSymbols(){
+  const S=SYM[LANG];
+  let rows='';
+  S.rows.forEach(r=>{ rows+='<tr><td class="sym">'+r[0]+'</td><td>'+r[1]+'</td></tr>'; });
+  let html='<table class="symtbl">'+rows+'</table>'
+    +'<div class="symdef"><h4>'+S.shortTtl+'</h4>'
+    +'<p>'+S.short100+'</p><p>'+S.shortLt+'</p></div>';
+  document.getElementById('symBody').innerHTML=html;
+  document.getElementById('symTitle').textContent=S.title;
+}
+function setLang(l){
+  LANG=l;document.getElementById('langmenu').classList.remove('open');
+  document.querySelectorAll('#langmenu button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  applyStatic();render();
+}
+function applyStatic(){
+  document.getElementById('langcode').textContent=t('code');
+  document.getElementById('ttl').textContent='WeldCheck';
+  document.getElementById('stdline').textContent=(STANDARD==='5817'?'DS/EN ISO 5817:2023':'DS/EN ISO 10042:2018');
+  document.getElementById('ttlsub').textContent=(STANDARD==='5817'?t('ttlsub'):t('ttlsubAl'));
+  document.getElementById('lblStep1').textContent=t('step1');
+  document.getElementById('lblStep2').textContent=t('step2');
+  document.getElementById('lblStep3').textContent=t('step3');
+  document.getElementById('descD').textContent=t('dDesc');
+  document.getElementById('descC').textContent=t('cDesc');
+  document.getElementById('descB').textContent=t('bDesc');
+  document.getElementById('lblWeld').textContent=t('weld');
+  document.getElementById('seg-butt').textContent=t('butt');
+  document.getElementById('seg-fillet').textContent=t('fillet');
+  document.getElementById('lblT').textContent=t('tLbl');
+  document.getElementById('hintT').textContent=t('tHint');
+  document.getElementById('lblB').innerHTML=t('bLbl')+' <span class="badge">'+t('bOpt')+'</span>';
+  document.getElementById('hintB').textContent=t('bHint');
+  document.getElementById('disc').innerHTML=t('disc');
+  // contact sheet texts
+  document.getElementById('cTitle').textContent=t('cTitle');
+  document.getElementById('cBody').textContent=t('cBody');
+  document.getElementById('cMailTxt').textContent=t('cMail');
+  document.getElementById('cClose').textContent=t('cClose');
+  document.getElementById('installTxt').textContent=t('installTxt');
+  document.getElementById('iosHintTxt').textContent=t('iosHintTxt');
+  document.getElementById('fatTtl').textContent=t('fatTtl');
+  document.getElementById('fatSub').textContent=t('fatSub');
+  buildSymbols();
+  document.getElementById('lblStep0').textContent=t('step0');
+  document.getElementById('sub5817').textContent=t('sub5817');
+  document.getElementById('sub10042').textContent=t('sub10042');
+  document.getElementById('ttlsub').textContent=(STANDARD==='5817'?t('ttlsub'):t('ttlsubAl'));
+  if(FAT)updateFatNote();
+  updateSAlabels();
+}
+function updateSAlabels(){
+  const isF=WELD==='fillet';
+  document.getElementById('lblSA').textContent= isF? t('saFillet'):t('saButt');
+  document.getElementById('hintSA').textContent= isF? t('saHintFillet'):t('saHintButt');
+  const note=document.getElementById('amaalNote');
+  note.textContent=t('amaal');
+  note.classList.toggle('show',isF);
+}
+function setLevel(l){LEVEL=l;document.querySelectorAll('.lvl').forEach(e=>e.classList.toggle('on',e.dataset.l===l));updateFatVisibility();render();}
+function updateFatVisibility(){
+  // FAT (Annex B) only exists for ISO 5817 and only applies to level B
+  const show = (STANDARD==='5817' && LEVEL==='B');
+  document.querySelector('.fatwrap').style.display = show ? '' : 'none';
+  if(!show && FAT){ FAT=false; document.getElementById('fatToggle').checked=false;
+    document.getElementById('fatLevels').classList.remove('show');
+    document.getElementById('fatNote').classList.remove('show'); }
+}
+function setStandard(std){
+  STANDARD=std;
+  document.getElementById('std-5817').classList.toggle('on',std==='5817');
+  document.getElementById('std-10042').classList.toggle('on',std==='10042');
+  // header subtitle reflects standard
+  document.getElementById('stdline').textContent=(std==='5817'?'DS/EN ISO 5817:2023':'DS/EN ISO 10042:2018');
+  document.getElementById('ttlsub').textContent = (std==='5817'? t('ttlsub') : t('ttlsubAl'));
+  updateFatVisibility();
+  render();
+}
+function setWeld(w){WELD=w;document.getElementById('seg-butt').classList.toggle('on',w==='butt');document.getElementById('seg-fillet').classList.toggle('on',w==='fillet');updateSAlabels();render();}
+function setFat(on){FAT=on;
+  document.getElementById('fatLevels').classList.toggle('show',on);
+  document.getElementById('fatNote').classList.toggle('show',on);
+  if(on && WELD==='fillet' && FATLVL==='B125'){ setFatLevel('B90'); }
+  updateFatNote();render();
+}
+function setFatLevel(f){
+  if(WELD==='fillet' && f==='B125') return; // fillet excluded from B125
+  FATLVL=f;
+  document.querySelectorAll('.fatbtn').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  updateFatNote();render();
+}
+function updateFatNote(){
+  const n=document.getElementById('fatNote');
+  let txt=t('fatNoteBase');
+  if(WELD==='fillet'){ txt+=' '+t('fatNoteFillet'); }
+  n.innerHTML=txt;
+  // disable B125 button for fillet
+  document.querySelectorAll('.fatbtn').forEach(b=>{
+    if(b.dataset.f==='B125'){ b.style.opacity = (WELD==='fillet')?'.35':'1'; b.style.pointerEvents=(WELD==='fillet')?'none':'auto'; }
+  });
+}
+
+const NP='__NP__',PERM='__PERM__',COND='__COND__';
+function val(v){return Math.round(v*100)/100;}
+function fmt(v){return val(v)+' mm';}
+function mn(a,b){return Math.min(a,b);}
+
+function figFor(key){
+  // Original schematic sketches of generic weld geometry (not reproductions of any standard's figures).
+  // Hatched grey = parent material, green = weld metal, red = measured dimension, blue = angle.
+  const HATCH = '<defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs>';
+  function base(x,y,w,h){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/>`;}
+  function arrow(){return '';}
+  switch(key){
+    case '1.75011/5012': // undercut – groove melted INTO parent metal at the weld toe
+      return {svg:`<svg viewBox="0 0 240 150"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs> <path d="M20 80 H78 Q86 80 90 72 L96 62 Q120 80 144 62 L150 72 Q154 80 162 80 H220 V116 H20 Z" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M96 62 Q120 30 144 62 Q120 76 96 62Z"/> <line class="sv-dim" x1="20" y1="80" x2="78" y2="80" stroke-dasharray="4 3"/> <line class="sv-dim" x1="86" y1="80" x2="86" y2="68"/> <line class="sv-dim" x1="80" y1="68" x2="92" y2="68"/> <text class="sv-txt" x="64" y="74">h</text> </svg>`,cap:'h = kærvdybde i grundmateriale'};
+    case '1.85013': case '1.17515': // shrinkage groove / root concavity – dip below the surface line
+      return {svg:`<svg viewBox="0 0 240 130"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs><rect x="20" y="60" width="200" height="40" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M62 60 Q120 50 178 60 Q178 60 178 60 Q150 60 140 72 Q120 84 100 72 Q90 60 62 60Z"/> <line class="sv-dim" x1="100" y1="60" x2="140" y2="60" stroke-dasharray="4 3"/> <line class="sv-dim" x1="120" y1="60" x2="120" y2="79"/><line class="sv-dim" x1="114" y1="79" x2="126" y2="79"/> <text class="sv-txt" x="128" y="74">h</text></svg>`,cap:'h = dybde fra overfladelinje'};
+    case '1.9502': // excess weld metal (butt) – reinforcement above the plate surface
+      return {svg:`<svg viewBox="0 0 240 140">${HATCH}${base(20,82,200,34)}
+        <path class="sv-weld" d="M70 82 Q120 40 170 82 Z"/>
+        <line class="sv-dim" x1="20" y1="82" x2="220" y2="82" stroke-dasharray="4 3"/>
+        <line class="sv-dim" x1="120" y1="82" x2="120" y2="46"/>
+        <line class="sv-dim" x1="114" y1="46" x2="126" y2="46"/>
+        <text class="sv-txt" x="128" y="62">h</text>
+        <line class="sv-dim" x1="70" y1="124" x2="170" y2="124"/>
+        <line class="sv-dim" x1="70" y1="118" x2="70" y2="130"/>
+        <line class="sv-dim" x1="170" y1="118" x2="170" y2="130"/>
+        <text class="sv-txt" x="115" y="137">b</text>
+        </svg>`,cap:'h = højde over plade · b = bredde'};
+    case '1.10503': // excessive convexity (fillet)
+      return {svg:`<svg viewBox="0 0 220 150"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs><rect x="20" y="20" width="30" height="118" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/><rect x="50" y="108" width="150" height="30" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M50 84 L50 108 L74 108 Q66 96 50 84Z"/> <path class="sv-weld" d="M50 84 Q70 100 74 108 Q60 90 56 86 Z" fill="#9ad400"/> <path class="sv-dim" d="M50 84 L74 108" stroke-dasharray="4 3"/> <line class="sv-dim" x1="58" y1="92" x2="70" y2="86"/> <text class="sv-txt" x="72" y="88">h</text></svg>`,cap:'h = konveksitet'};
+    case '1.11504': // excessive penetration – weld bead protruding below the root side
+      return {svg:`<svg viewBox="0 0 240 160"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs><rect x="20" y="52" width="200" height="30" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M76 52 Q120 30 164 52 Z"/> <path class="sv-weld" d="M88 82 Q120 134 152 82 Z"/> <line class="sv-dim" x1="20" y1="82" x2="220" y2="82" stroke-dasharray="4 3"/> <line class="sv-dim" x1="120" y1="82" x2="120" y2="128"/><line class="sv-dim" x1="114" y1="128" x2="126" y2="128"/> <text class="sv-txt" x="128" y="112">h</text> <line class="sv-dim" x1="88" y1="90" x2="152" y2="90"/><line class="sv-dim" x1="88" y1="84" x2="88" y2="96"/><line class="sv-dim" x1="152" y1="84" x2="152" y2="96"/> <text class="sv-txt" x="113" y="104">b</text></svg>`,cap:'h = højde under rod · b = bredde'};
+    case '1.12505': // weld toe angle
+      return {svg:`<svg viewBox="0 0 240 140"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs><rect x="20" y="84" width="200" height="30" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M74 84 Q120 42 166 84 Z"/> <line class="sv-ang" x1="166" y1="84" x2="210" y2="84"/> <line class="sv-ang" x1="166" y1="84" x2="140" y2="58"/> <path class="sv-ang" d="M196 84 A30 30 0 0 0 184 62"/> <text class="sv-txt" x="188" y="78" style="fill:#5fb0ff;">α</text></svg>`,cap:'α = overgangsvinkel'};
+    case '1.13506': // overlap
+      return {svg:`<svg viewBox="0 0 240 130">${HATCH}${base(20,80,200,26)}<path class="sv-weld" d="M70 80 Q120 40 168 80 Q182 92 156 88 Q132 82 118 88Z"/><path class="sv-dim" d="M174 80 v10"/><text class="sv-txt" x="180" y="90">h</text></svg>`,cap:'h = overløb'};
+    case '1.14509': // sagging
+      return {svg:`<svg viewBox="0 0 240 130">${HATCH}${base(20,56,200,22)}<path class="sv-weld" d="M84 78 Q120 116 156 78Z"/><path class="sv-dim" d="M120 78 v32"/><line class="sv-dim" x1="114" y1="110" x2="126" y2="110"/><text class="sv-txt" x="128" y="100">h</text></svg>`,cap:'h = nedløb'};
+    case '1.16512': // asymmetry of fillet weld
+      return {svg:`<svg viewBox="0 0 220 160">${HATCH}${base(20,20,28,128)}${base(48,112,150,28)}<path class="sv-weld" d="M48 52 L48 112 L138 112Z"/><path class="sv-dim" d="M40 52 V112"/><line class="sv-dim" x1="34" y1="52" x2="46" y2="52"/><line class="sv-dim" x1="34" y1="112" x2="46" y2="112"/><text class="sv-txt" x="22" y="86">Z₁</text><path class="sv-dim" d="M48 122 H138"/><text class="sv-txt" x="86" y="135">Z₂</text></svg>`,cap:'h = |Z₁ − Z₂|'};
+    case '1.205213': // insufficient throat thickness
+      return {svg:`<svg viewBox="0 0 220 160">${HATCH}${base(20,20,28,128)}${base(48,112,150,28)}<path class="sv-weld" d="M48 78 L48 112 L102 112Z"/><path class="sv-dim" d="M48 112 L82 86"/><line class="sv-dim" x1="60" y1="96" x2="70" y2="104"/><text class="sv-txt" x="74" y="98">a</text></svg>`,cap:'a = faktisk a-mål'};
+    case '1.215214': // excessive throat thickness
+      return {svg:`<svg viewBox="0 0 220 170">${HATCH}${base(20,20,28,140)}${base(48,124,150,28)}<path class="sv-weld" d="M48 44 L48 124 L156 124Z"/><path class="sv-dim" d="M48 124 L99 76"/><text class="sv-txt" x="86" y="92">a</text></svg>`,cap:'a = for stort a-mål'};
+    case '1.32017': case '1.42025': // surface pore / open crater – cavity opening on the weld face
+      return {svg:`<svg viewBox="0 0 240 130"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs><rect x="20" y="62" width="200" height="38" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M64 62 Q120 34 176 62 Q120 78 64 62Z"/> <ellipse cx="120" cy="60" rx="11" ry="8" fill="#000"/> <line class="sv-dim" x1="109" y1="60" x2="131" y2="60"/><line class="sv-dim" x1="109" y1="55" x2="109" y2="65"/><line class="sv-dim" x1="131" y1="55" x2="131" y2="65"/> <text class="sv-txt" x="135" y="64">d</text></svg>`,cap:'d = porediameter'};
+    case '3.15071': case '3.15072': // linear misalignment
+      return {svg:`<svg viewBox="0 0 240 130">${HATCH}${base(20,48,98,26)}${base(122,62,98,26)}<path class="sv-weld" d="M112 48 L128 48 L128 88 L112 88Z"/><path class="sv-dim" d="M138 48 v14"/><line class="sv-dim" x1="132" y1="48" x2="144" y2="48"/><line class="sv-dim" x1="132" y1="62" x2="144" y2="62"/><text class="sv-txt" x="148" y="60">h</text></svg>`,cap:'h = forsætning'};
+    case '3.2617': // root gap fillet
+      return {svg:`<svg viewBox="0 0 220 160">${HATCH}${base(20,20,28,128)}${base(58,112,140,28)}<path class="sv-weld" d="M48 58 Q78 84 58 112 L48 112Z"/><path class="sv-dim" d="M48 118 H58"/><text class="sv-txt" x="44" y="132">h</text></svg>`,cap:'h = rodspalte'};
+    case '1.64021': // incomplete root penetration – root not reached, gap left unfused
+      return {svg:`<svg viewBox="0 0 240 150"><defs><pattern id="ht" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#5b6440" stroke-width="1.4"/></pattern></defs> <path d="M20 50 H110 V92 H130 V50 H220 V74 H20 Z" fill="url(#ht)" stroke="#7c855f" stroke-width="1.2"/> <path class="sv-weld" d="M78 50 Q120 22 162 50 Q140 50 130 60 L130 74 L110 74 L110 60 Q100 50 78 50Z"/> <line class="sv-dim" x1="120" y1="74" x2="120" y2="92"/><line class="sv-dim" x1="114" y1="92" x2="126" y2="92"/> <text class="sv-txt" x="128" y="88">h</text></svg>`,cap:'h = manglende gennemsvejsning'};
+    default:return null;
+  }
+}
+
+function buildDefects(t_, sa, b){
+  if(STANDARD==='10042') return buildDefects10042(t_, sa, b);
+  return buildDefects5817(t_, sa, b);
+}
+
+function buildDefects5817(t_, sa, b){
+  const isThin=t_<=3, W=WELD, D=LEVEL;
+  const hasB=(b!==null&&!isNaN(b)&&b>0);
+  const SY = W==='butt'?'s':'aA';
+  const out=[];
+  function push(no,iso,res,remarkKey,dim){out.push({no,iso,key:no+iso,res,remark:remarkKey?tx(remarkKey):null,dim});}
+
+  push('1.1','100',{type:NP},'alwaysNo');
+  push('1.2','104',{type:NP});
+
+  (function(){let r;
+    if(D==='B'){r={type:NP};}
+    else if(D==='C'){ r=isThin?{type:NP}:{type:'val',v:mn(0.2*sa,2),formula:'d ≤ 0,2·'+SY+' (max 2)'}; }
+    else { r=isThin?{type:'val',v:0.3*sa,formula:'d ≤ 0,3·'+SY}:{type:'val',v:mn(0.3*sa,3),formula:'d ≤ 0,3·'+SY+' (max 3)'}; }
+    push('1.3','2017',r,'poreNote','d');})();
+
+  (function(){let r;
+    if(D==='B'){r={type:NP};}
+    else if(D==='C'){ r=isThin?{type:NP}:{type:'val',v:mn(0.1*sa,1),formula:'h ≤ 0,1·'+SY+' (max 1)'}; }
+    else { r=isThin?{type:'val',v:0.2*sa,formula:'h ≤ 0,2·'+SY}:{type:'val',v:mn(0.2*sa,2),formula:'h ≤ 0,2·'+SY+' (max 2)'}; }
+    push('1.4','2025',r,null,'h');})();
+
+  (function(){let r;
+    if(D==='B'||D==='C'){r={type:NP};}
+    else{r={type:'val',v:mn(0.2*t_,2),formula:'h ≤ 0,2·t (max 2)'};}
+    push('1.6','4021',r,'rootSingle','h');})();
+
+  (function(){let r;
+    if(isThin){ if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'}; else r={type:'val',v:0.2*t_,formula:'h ≤ 0,2·t'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'}; else if(D==='C')r={type:'val',v:mn(0.1*t_,0.5),formula:'h ≤ 0,1·t (max 0,5)'}; else r={type:'val',v:mn(0.2*t_,1),formula:'h ≤ 0,2·t (max 1)'}; }
+    push('1.7','5011/5012',r,'toeNote'==='x'?null:null,'h');})();
+
+  (function(){let r;
+    if(isThin){ if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'}; else r={type:'val',v:0.1*t_+0.2,formula:'h ≤ 0,1·t + 0,2'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'}; else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'}; else r={type:'val',v:mn(0.2*t_,2),formula:'h ≤ 0,2·t (max 2)'}; }
+    push('1.8','5013',r,null,'h');})();
+
+  if(W==='butt'){(function(){let r;
+    if(!hasB){r={type:COND,text:t('enterB')};}
+    else if(D==='B')r={type:'val',v:mn(0.1*b+1,5),formula:'h ≤ 0,1·b + 1 (max 5)'};
+    else if(D==='C')r={type:'val',v:mn(0.15*b+1,7),formula:'h ≤ 0,15·b + 1 (max 7)'};
+    else r={type:'val',v:mn(0.25*b+1,10),formula:'h ≤ 0,25·b + 1 (max 10)'};
+    push('1.9','502',r,null,'h');})();}
+
+  if(W==='fillet'){(function(){let r;
+    if(!hasB){r={type:COND,text:t('enterB')};}
+    else if(D==='B')r={type:'val',v:mn(0.1*b+1,3),formula:'h ≤ 0,1·b + 1 (max 3)'};
+    else if(D==='C')r={type:'val',v:mn(0.15*b+1,4),formula:'h ≤ 0,15·b + 1 (max 4)'};
+    else r={type:'val',v:mn(0.25*b+1,5),formula:'h ≤ 0,25·b + 1 (max 5)'};
+    push('1.10','503',r,null,'h');})();}
+
+  (function(){let r;
+    if(!hasB){r={type:COND,text:t('enterB')};}
+    else if(isThin){ if(D==='B')r={type:'val',v:0.1*b+1,formula:'h ≤ 0,1·b + 1'}; else if(D==='C')r={type:'val',v:0.3*b+1,formula:'h ≤ 0,3·b + 1'}; else r={type:'val',v:0.6*b+1,formula:'h ≤ 0,6·b + 1'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.2*b+1,3),formula:'h ≤ 0,2·b + 1 (max 3)'}; else if(D==='C')r={type:'val',v:mn(0.45*b+1,4),formula:'h ≤ 0,45·b + 1 (max 4)'}; else r={type:'val',v:mn(1.0*b+1,5),formula:'h ≤ 1,0·b + 1 (max 5)'}; }
+    push('1.11','504',r,null,'h');})();
+
+  (function(){let a;
+    if(W==='butt')a=(D==='B'?150:(D==='C'?110:90)); else a=(D==='B'?110:(D==='C'?100:90));
+    push('1.12','505',{type:'angle',v:a}, W==='butt'?'toeNote':'filletToe','α');})();
+
+  (function(){let r;
+    if(D==='B'||D==='C')r={type:NP};
+    else { r=hasB?{type:'val',v:0.2*b,formula:'h ≤ 0,2·b'}:{type:COND,text:t('enterB')}; }
+    push('1.13','506',r,null,'h');})();
+
+  (function(){let r;
+    if(isThin){ if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'}; else r={type:'val',v:0.25*t_,formula:'h ≤ 0,25·t'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'}; else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'}; else r={type:'val',v:mn(0.25*t_,2),formula:'h ≤ 0,25·t (max 2)'}; }
+    push('1.14','509',r,null,'h');})();
+
+  push('1.15','510',{type:NP});
+
+  if(W==='fillet'){(function(){let r;
+    if(D==='B')r={type:'val',v:0.15*sa+1.5,formula:'h ≤ 0,15·aA + 1,5'};
+    else if(D==='C')r={type:'val',v:0.15*sa+2,formula:'h ≤ 0,15·aA + 2'};
+    else r={type:'val',v:0.2*sa+2,formula:'h ≤ 0,2·aA + 2'};
+    push('1.16','512',r,'asymNote','h');})();}
+
+  (function(){let r;
+    if(isThin){ if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'}; else r={type:'val',v:0.1*t_+0.2,formula:'h ≤ 0,1·t + 0,2'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'}; else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'}; else r={type:'val',v:mn(0.2*t_,2),formula:'h ≤ 0,2·t (max 2)'}; }
+    push('1.17','515',r,null,'h');})();
+
+  (function(){let r; if(D==='B'||D==='C')r={type:NP}; else r={type:COND,text:tx('appDep')}; push('1.18','516',r);})();
+  (function(){let r; if(D==='B'||D==='C')r={type:NP}; else r={type:COND,text:tx('restart')}; push('1.19','517',r);})();
+
+  if(W==='fillet'){(function(){let r;
+    if(isThin){ if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:0.2,formula:'h ≤ 0,2'}; else r={type:'val',v:0.1*sa+0.2,formula:'h ≤ 0,1·a + 0,2'}; }
+    else { if(D==='B')r={type:NP}; else if(D==='C')r={type:'val',v:mn(0.1*sa+0.3,1),formula:'h ≤ 0,1·a + 0,3 (max 1)'}; else r={type:'val',v:mn(0.1*sa+0.3,2),formula:'h ≤ 0,1·a + 0,3 (max 2)'}; }
+    push('1.20','5213',r,'throatNote','h');})();}
+
+  if(W==='fillet'){(function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.15*sa+1,3),formula:'h ≤ 0,15·a + 1 (max 3)'};
+    else if(D==='C')r={type:'val',v:mn(0.2*sa+1,4),formula:'h ≤ 0,2·a + 1 (max 4)'};
+    else r={type:PERM};
+    push('1.21','5214',r,null,'h');})();}
+
+  (function(){let r; if(D==='B'||D==='C')r={type:NP}; else r={type:COND,text:tx('strayOK')}; push('1.22','601',r);})();
+  push('1.23','602',{type:COND,text:tx('appDep')});
+  push('1.24','610',{type:COND,text:tx('appDep')});
+
+  (function(){let r;
+    if(isThin){ if(D==='B')r={type:'val',v:0.1*t_+0.2,formula:'h ≤ 0,1·t + 0,2'}; else if(D==='C')r={type:'val',v:0.15*t_+0.2,formula:'h ≤ 0,15·t + 0,2'}; else r={type:'val',v:0.25*t_+0.2,formula:'h ≤ 0,25·t + 0,2'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.1*t_,3),formula:'h ≤ 0,1·t (max 3)'}; else if(D==='C')r={type:'val',v:mn(0.15*t_,4),formula:'h ≤ 0,15·t (max 4)'}; else r={type:'val',v:mn(0.25*t_,5),formula:'h ≤ 0,25·t (max 5)'}; }
+    push('3.1','5071',r,'plateNote','h');})();
+
+  (function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.5*t_,2),formula:'h ≤ 0,5·t (max 2)'};
+    else if(D==='C')r={type:'val',v:mn(0.5*t_,3),formula:'h ≤ 0,5·t (max 3)'};
+    else r={type:'val',v:mn(0.5*t_,4),formula:'h ≤ 0,5·t (max 4)'};
+    push('3.1','5072',r,'tubeNote','h');})();
+
+  if(W==='fillet'){(function(){let r;
+    if(isThin){ if(D==='B')r={type:'val',v:0.1*sa+0.2,formula:'h ≤ 0,1·aA + 0,2'}; else if(D==='C')r={type:'val',v:0.1*sa+0.3,formula:'h ≤ 0,1·aA + 0,3'}; else r={type:'val',v:0.1*sa+0.5,formula:'h ≤ 0,1·aA + 0,5'}; }
+    else { if(D==='B')r={type:'val',v:mn(0.1*sa+0.5,2),formula:'h ≤ 0,1·aA + 0,5 (max 2)'}; else if(D==='C')r={type:'val',v:mn(0.2*sa+0.5,3),formula:'h ≤ 0,2·aA + 0,5 (max 3)'}; else r={type:'val',v:mn(0.3*sa+1,4),formula:'h ≤ 0,3·aA + 1 (max 4)'}; }
+    push('3.2','617',r,null,'h');})();}
+
+  // ---- FAT overrides (Annex B / Table B.1) ----
+  // Only applies on top of B or C. C63 builds on C; B90/B125 build on B.
+  // 'a' in Table B.1 = same as base B/C value -> we keep the existing result.
+  // Here we only inject the EXTRA criteria that differ (mainly B125, plus weld-toe radius row).
+  if(FAT){
+    const F=FATLVL;
+    const map={};
+    out.forEach((d,i)=>map[d.key]=i);
+    function setRes(key,res){ if(map[key]!==undefined) out[map[key]].fat=res; }
+    function extra(key,text){ if(map[key]!==undefined) out[map[key]].fatNote=text; }
+
+    // 1.7 undercut, 1.8 groove, 1.14 sagging, 1.17 root concavity: B125 -> not permitted
+    if(F==='B125'){
+      ['1.75011/5012','1.85013','1.14509','1.17515'].forEach(k=>{ if(!isThin) setRes(k,{type:NP}); });
+      // 1.9 excess weld metal (butt): h <= 0,2 + 0,1 b, max 2
+      if(W==='butt' && hasB) setRes('1.9502',{type:'val',v:mn(0.2+0.1*b,2),formula:'h ≤ 0,2 + 0,1·b (max 2)'});
+      // 1.11 excessive penetration: h <= 0,2 + 0,05 b (>3 max 1)
+      if(hasB) setRes('1.11504', isThin?{type:'val',v:0.2+0.05*b,formula:'h ≤ 0,2 + 0,05·b'}:{type:'val',v:mn(0.2+0.05*b,1),formula:'h ≤ 0,2 + 0,05·b (max 1)'});
+      // 1.23 spatter -> not permitted
+      setRes('1.23602',{type:NP});
+      // 3.1 plates: h <= 0,05 t max 1,5
+      setRes('3.15071',{type:'val',v:mn(0.05*t_,1.5),formula:'h ≤ 0,05·t (max 1,5)'});
+    }
+    if(F==='B90'){
+      // 3.1 plates: h <= 0,1 t max 3
+      setRes('3.15071',{type:'val',v:mn(0.1*t_,3),formula:'h ≤ 0,1·t (max 3)'});
+      // 3.1 tubes: h <= 0,5 t max 1
+      setRes('3.15072',{type:'val',v:mn(0.5*t_,1),formula:'h ≤ 0,5·t (max 1)'});
+    }
+    // weld-toe radius row (ISO 6520-1: 5052) — only meaningful for fatigue, t>3
+    if(!isThin){
+      let rr=null;
+      if(F==='B90') rr={type:'val',v:1,formula:'r ≥ 1 mm', isMin:true};
+      else if(F==='B125') rr={type:'val',v:4,formula:'r ≥ 4 mm', isMin:true};
+      if(rr){ out.push({no:'—',iso:'5052',key:'fat5052',res:rr,remark:null,dim:'r',fatRow:true}); }
+    }
+    // angular misalignment 3.3 (508) — fatigue only
+    (function(){
+      let b3 = F==='C63'?2:1;
+      out.push({no:'3.3',iso:'508',key:'fat508',res:{type:'angle',v:b3,sym:'β',op:'≤'},remark:null,dim:'β',fatRow:true});
+    })();
+  }
+
+  return out;
+}
+
+// ---- ISO 10042 (aluminium, arc-welded) — surface imperfections only ----
+function buildDefects10042(t_, sa, b){
+  const isThin=t_<=3, W=WELD, D=LEVEL;
+  const hasB=(b!==null&&!isNaN(b)&&b>0);
+  const SY = W==='butt'?'s':'a';
+  const out=[];
+  function push(no,iso,res,remarkKey,dim){out.push({no,iso,key:no+iso,res,remark:remarkKey?tx(remarkKey):null,dim});}
+
+  // 1.1 / 1.2 cracks
+  push('1.1','100',{type:NP},'alwaysNo');
+  push('1.2','104',{type:NP});
+
+  // 1.3 surface porosity (2018) — area %; D 1%, C 0.5%, B not permitted
+  (function(){let r;
+    if(D==='B')r={type:NP};
+    else if(D==='C')r={type:'pct',v:0.5,formula:'≤ 0,5 %'};
+    else r={type:'pct',v:1,formula:'≤ 1 %'};
+    push('1.3','2018',r,'poreNote','%');})();
+
+  // 1.6 surface pore (2017) — single pore d
+  (function(){let r;
+    if(D==='B')r={type:NP};
+    else if(D==='C'){ r=isThin?{type:NP}:{type:'val',v:mn(0.2*sa,1.5),formula:'d ≤ 0,2·'+SY+' (max 1,5)'}; }
+    else { r=isThin?{type:'val',v:0.3*sa,formula:'d ≤ 0,3·'+SY}:{type:'val',v:mn(0.3*sa,3),formula:'d ≤ 0,3·'+SY+' (max 3)'}; }
+    push('1.6','2017',r,'poreNote','d');})();
+
+  // 1.7 end crater pipe (2025)
+  (function(){let r;
+    if(D==='B')r={type:NP};
+    else if(D==='C')r={type:'val',v:mn(0.1*sa,1),formula:'h ≤ 0,1·'+SY+' (max 1)'};
+    else r={type:'val',v:mn(0.2*sa,2),formula:'h ≤ 0,2·'+SY+' (max 2)'};
+    push('1.7','2025',r,null,'h');})();
+
+  // 1.9 incomplete root penetration (4021) — short imperfections, no systematic; D only
+  (function(){let r;
+    if(D==='B'||D==='C')r={type:NP};
+    else r={type:'val',v:mn(0.2*t_,2),formula:'h ≤ 0,2·t (max 2)'};
+    push('1.9','4021',r,'rootSingle','h');})();
+
+  // 1.10 continuous/intermittent undercut (5011/5012) — smooth transition; 5012 not systematic
+  (function(){let r;
+    if(isThin){
+      if(D==='B')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'};
+      else if(D==='C')r={type:'val',v:0.1*t_,formula:'h ≤ 0,1·t'};
+      else r={type:'val',v:0.2*t_,formula:'h ≤ 0,2·t'};
+    } else {
+      if(D==='B')r={type:'val',v:mn(0.1*t_,0.5),formula:'h ≤ 0,1·t (max 0,5)'};
+      else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'};
+      else r={type:'val',v:mn(0.2*t_,1.5),formula:'h ≤ 0,2·t (max 1,5)'};
+    }
+    push('1.10','5011/5012',r,null,'h');})();
+
+  // 1.11 excess weld metal (502) — needs b; aluminium uses 1,5 mm base
+  (function(){let r;
+    if(!hasB){r={type:COND,text:t('enterB')};}
+    else if(D==='B')r={type:'val',v:mn(1.5+0.1*b,6),formula:'h ≤ 1,5 + 0,1·b (max 6)'};
+    else if(D==='C')r={type:'val',v:mn(1.5+0.15*b,8),formula:'h ≤ 1,5 + 0,15·b (max 8)'};
+    else r={type:'val',v:mn(1.5+0.2*b,10),formula:'h ≤ 1,5 + 0,2·b (max 10)'};
+    push('1.11','502',r,null,'h');})();
+
+  // 1.12 excessive convexity (503) — needs b
+  (function(){let r;
+    if(!hasB){r={type:COND,text:t('enterB')};}
+    else if(D==='B')r={type:'val',v:mn(1.5+0.1*b,3),formula:'h ≤ 1,5 + 0,1·b (max 3)'};
+    else if(D==='C')r={type:'val',v:mn(1.5+0.15*b,4),formula:'h ≤ 1,5 + 0,15·b (max 4)'};
+    else r={type:'val',v:mn(1.5+0.3*b,5),formula:'h ≤ 1,5 + 0,3·b (max 5)'};
+    push('1.12','503',r,null,'h');})();
+
+  // 1.13 insufficient throat thickness (5213) — fillet; short imperfections
+  if(W==='fillet'){(function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.1*sa,1),formula:'h ≤ 0,1·a (max 1)'};
+    else if(D==='C')r={type:'val',v:mn(0.2*sa,1.5),formula:'h ≤ 0,2·a (max 1,5)'};
+    else r={type:'val',v:mn(0.3*sa,2),formula:'h ≤ 0,3·a (max 2)'};
+    push('1.13','5213',r,'throatNote','h');})();}
+
+  // 1.14 excess penetration (504) — D6/C4/B3 mm flat caps
+  (function(){let r;
+    if(D==='B')r={type:'val',v:3,formula:'h ≤ 3 mm'};
+    else if(D==='C')r={type:'val',v:4,formula:'h ≤ 4 mm'};
+    else r={type:'val',v:6,formula:'h ≤ 6 mm'};
+    push('1.14','504',r,null,'h');})();
+
+  // 1.15 overlap (506) — needs b; D only
+  (function(){let r;
+    if(D==='B'||D==='C')r={type:NP};
+    else { r=hasB?{type:'val',v:0.2*b,formula:'h ≤ 0,2·b'}:{type:COND,text:t('enterB')}; }
+    push('1.15','506',r,null,'h');})();
+
+  // 1.16 sagging / incompletely filled groove (509/511) — smooth transition
+  (function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'};
+    else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'};
+    else r={type:'val',v:mn(0.2*t_,1.5),formula:'h ≤ 0,2·t (max 1,5)'};
+    push('1.16','509/511',r,null,'h');})();
+
+  // 1.17 excessive asymmetry of fillet (512) — fillet, only when symmetric prescribed
+  if(W==='fillet'){(function(){let r;
+    if(D==='B')r={type:'val',v:1.5+0.2*sa,formula:'h ≤ 1,5 + 0,2·a'};
+    else if(D==='C')r={type:'val',v:2+0.25*sa,formula:'h ≤ 2 + 0,25·a'};
+    else r={type:'val',v:3+0.3*sa,formula:'h ≤ 3 + 0,3·a'};
+    push('1.17','512',r,'asymNote','h');})();}
+
+  // 1.18 root concavity (515) — smooth transition
+  (function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.05*t_,0.5),formula:'h ≤ 0,05·t (max 0,5)'};
+    else if(D==='C')r={type:'val',v:mn(0.1*t_,1),formula:'h ≤ 0,1·t (max 1)'};
+    else r={type:'val',v:mn(0.2*t_,1.5),formula:'h ≤ 0,2·t (max 1,5)'};
+    push('1.18','515',r,null,'h');})();
+
+  // 1.19 poor restart (517) — D permitted
+  (function(){let r; if(D==='B'||D==='C')r={type:NP}; else r={type:COND,text:tx('restart')}; push('1.19','517',r);})();
+  // 1.20 stray arc (601)
+  (function(){let r; if(D==='B'||D==='C')r={type:NP}; else r={type:COND,text:tx('strayOK')}; push('1.20','601',r);})();
+  // 1.21 spatter (602)
+  (function(){let r; if(D==='B')r={type:NP}; else r={type:COND,text:tx('appDep')}; push('1.21','602',r);})();
+
+  // 3.1 linear misalignment (507) — plates
+  (function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.2*t_,2),formula:'h ≤ 0,2·t (max 2)'};
+    else if(D==='C')r={type:'val',v:mn(0.3*t_,4),formula:'h ≤ 0,3·t (max 4)'};
+    else r={type:'val',v:mn(0.4*t_,8),formula:'h ≤ 0,4·t (max 8)'};
+    push('3.1','5071',r,'plateNote','h');})();
+  // 3.1 misalignment tubes / circumferential
+  (function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.2*t_,4),formula:'h ≤ 0,2·t (max 4)'};
+    else if(D==='C')r={type:'val',v:mn(0.3*t_,6),formula:'h ≤ 0,3·t (max 6)'};
+    else r={type:'val',v:mn(0.4*t_,10),formula:'h ≤ 0,4·t (max 10)'};
+    push('3.1','5072',r,'tubeNote','h');})();
+
+  // 3.2 incorrect root gap (617) — fillet
+  if(W==='fillet'){(function(){let r;
+    if(D==='B')r={type:'val',v:mn(0.5+0.1*sa,3),formula:'h ≤ 0,5 + 0,1·a (max 3)'};
+    else if(D==='C')r={type:'val',v:mn(0.5+0.15*sa,4),formula:'h ≤ 0,5 + 0,15·a (max 4)'};
+    else r={type:'val',v:mn(1+0.2*sa,5),formula:'h ≤ 1 + 0,2·a (max 5)'};
+    push('3.2','617',r,null,'h');})();}
+
+  return out;
+}
+
+function angTxt(r){const sym=r.sym||'α';const op=r.op||'≥';return sym+' '+op+' '+r.v+'°';}
+function resLabel(r){
+  if(r.type===NP)return {txt:t('notAllowed'),cls:'no'};
+  if(r.type===PERM)return {txt:t('allowed'),cls:'ok'};
+  if(r.type===COND)return {txt:t('cond'),cls:'cond'};
+  if(r.type==='angle')return {txt:angTxt(r),cls:'ok'};
+  if(r.type==='pct')return {txt:'≤ '+val(r.v)+' %',cls:'ok'};
+  if(r.type==='val')return {txt:(r.isMin?'≥ ':'≤ ')+fmt(r.v),cls:'ok'};
+  return {txt:'',cls:''};
+}
+
+function toggle(key){ if(openSet.has(key))openSet.delete(key); else openSet.add(key); render(); }
+
+function render(){
+  const t_=parseFloat(document.getElementById('t').value);
+  const sa=parseFloat(document.getElementById('sa').value);
+  const bRaw=document.getElementById('b').value;
+  const b=bRaw===''?null:parseFloat(bRaw);
+  const box=document.getElementById('results');
+  if(isNaN(t_)||t_<0.5){box.innerHTML='<div class="empty">t ≥ 0,5 mm</div>';return;}
+
+  const defects=buildDefects(t_,isNaN(sa)?t_:sa,b);
+  let html='';
+  defects.forEach(d=>{
+    // FAT override replaces the displayed result if present
+    const r = (FAT && d.fat) ? d.fat : d.res;
+    const lab=resLabel(r);
+    const open=openSet.has(d.key);
+    let body='';
+    if(r.type==='val'){
+      body+='<div class="drow"><span class="k">'+t('maxLbl')+' '+(d.dim||'')+'</span><span class="v ok">'+(r.isMin?'≥ ':'≤ ')+fmt(r.v)+'</span></div>';
+      if(r.formula)body+='<div class="formula">'+r.formula+'</div>';
+    } else if(r.type==='pct'){
+      body+='<div class="drow"><span class="k">'+t('maxLbl')+' '+(d.dim||'')+'</span><span class="v ok">≤ '+val(r.v)+' %</span></div>';
+      if(r.formula)body+='<div class="formula">'+r.formula+'</div>';
+    } else if(r.type==='angle'){
+      body+='<div class="drow"><span class="k">'+t('minAngle')+' '+(d.dim||'')+'</span><span class="v ok">'+angTxt(r)+'</span></div>';
+    } else if(r.type===NP){
+      body+='<div class="drow"><span class="k">'+t('forLevel')+' '+(FAT?FATLVL:LEVEL)+'</span><span class="v no">'+t('notAllowed')+'</span></div>';
+    } else if(r.type===PERM){
+      body+='<div class="drow"><span class="k">'+t('forLevel')+' '+(FAT?FATLVL:LEVEL)+'</span><span class="v ok">'+t('allowed')+'</span></div>';
+    } else if(r.type===COND){
+      body+='<div class="remark">'+r.text+'</div>';
+    }
+    if(FAT && d.fat){ body+='<div class="remark" style="border-color:var(--accent2);color:var(--accent);">'+t('fatApplied')+' '+FATLVL+'</div>'; }
+    if(d.remark)body+='<div class="remark">'+d.remark+'</div>';
+    body+='<div class="iso6520">ISO 6520-1: '+d.iso+'</div>';
+
+    const name = d.fatRow ? fatRowName(d.key) : nm(d.key);
+    html+='<div class="defect '+(open?'open':'')+(d.fatRow?' fatrow':'')+'">'
+      +'<div class="dh" onclick="toggle(\''+d.key+'\')">'
+      +'<span class="dnum">'+d.no+'</span><span class="dname">'+name+'</span>'
+      +'<span class="dval '+lab.cls+'">'+lab.txt+'</span><span class="chev">▶</span></div>'
+      +'<div class="dbody '+(open?'open':'')+'">'+body+'</div></div>';
+  });
+  box.innerHTML=html;
+}
+
+function fatRowName(key){
+  if(key==='fat5052')return t('fatToeRadius');
+  if(key==='fat508')return t('fatAngular');
+  return key;
+}
+
+// Detect the phone's language before the user has chosen one in-app
+(function(){
+  try{
+    const supported=['da','en','de','pl','ro','lt'];
+    const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en'];
+    for(const l of langs){
+      const code=(l||'').slice(0,2).toLowerCase();
+      if(supported.includes(code)){ LANG=code; break; }
+    }
+    document.querySelectorAll('#langmenu button').forEach(b=>b.classList.toggle('on',b.dataset.l===LANG));
+  }catch(e){}
+})();
+
+applyStatic();
+updateFatVisibility();
+render();
+
+// PWA service worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+
+// ---- Install experience ----
+let deferredPrompt=null;
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+
+// Android/desktop: capture the install prompt and show our own button
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  if(!isStandalone){ document.getElementById('installBtn').style.display='flex'; }
+});
+function doInstall(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.finally(()=>{
+    deferredPrompt=null;
+    document.getElementById('installBtn').style.display='none';
+  });
+}
+// Hide the button once installed
+window.addEventListener('appinstalled',()=>{ document.getElementById('installBtn').style.display='none'; });
+
+// iOS (Safari): no install API — show a one-time hint
+(function(){
+  const ua=navigator.userAgent||'';
+  const isIOS=/iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const isSafari=/^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  let seen=false;
+  try{ seen=localStorage.getItem('wc_ios_hint')==='1'; }catch(e){}
+  if(isIOS && isSafari && !isStandalone && !seen){
+    setTimeout(()=>{ document.getElementById('iosHint').style.display='block'; }, 1200);
+  }
+})();
+function dismissIosHint(){
+  document.getElementById('iosHint').style.display='none';
+  try{ localStorage.setItem('wc_ios_hint','1'); }catch(e){}
+}
+</script>
+</body>
+</html>

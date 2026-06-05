@@ -1,0 +1,16 @@
+{
+  "name": "WeldCheck – Visuel svejsekontrol",
+  "short_name": "WeldCheck",
+  "description": "Visuelle overfladefejl og gyldighedsområder efter DS/EN ISO 5817:2023 og ISO 10042:2018",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11140f",
+  "theme_color": "#11140f",
+  "lang": "da",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

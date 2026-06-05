@@ -1,11 +1,13 @@
 // WeldCheck — service worker
-const CACHE = 'weldcheck-v1';
+const CACHE = 'weldcheck-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './favicon-32.png',
+  './favicon-180.png'
 ];
 
 self.addEventListener('install', e => {

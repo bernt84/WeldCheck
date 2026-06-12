@@ -150,6 +150,7 @@
   footer{padding:20px 16px calc(30px + env(safe-area-inset-bottom));color:#5a6047;font-size:10.5px;text-align:center;line-height:1.6;}
   footer b{color:var(--muted);}
   .author{color:var(--accent2);font-weight:700;letter-spacing:.5px;margin-top:8px;font-size:11.5px;}
+  .statnote{color:#6d7458;font-size:10px;line-height:1.5;margin-bottom:8px;}
   .disclaimer{background:#1b1f17;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;color:#8c9472;font-size:11px;line-height:1.55;}
   .symbox{margin-top:4px;margin-bottom:18px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);}
   .symhead{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:700;letter-spacing:.3px;padding:14px;cursor:pointer;}
@@ -264,6 +265,7 @@
 </div>
 
 <footer>
+  <div class="statnote" id="statNote"></div>
   <div class="author">Martin Bernt Christoffersen</div>
 </footer>
 
@@ -318,7 +320,7 @@ const I = {
     maxLbl:'Maks.',minAngle:'Min. vinkel',forLevel:'Kvalitetsniveau',
     enterB:'Indtast sømbredde b',
     disc:'Værktøjet dækker <b>kun visuelt kontrollerbare overfladefejl</b> fra Tabel 1. Indre fejl (bindingsfejl mellem strenge, indeslutninger, volumenporøsitet, mikrofejl m.fl.) kræver NDT og er udeladt med vilje. Beregningerne er vejledende — gældende standard er altid den autoritative kilde.',
-    cTitle:'Kontakt',cBody:'Spørgsmål, fejl eller forslag til værktøjet? Skriv gerne.',cMail:'Send e-mail',cClose:'Luk',installTxt:'Installér app',iosHintTxt:'Tip: tryk Del-knappen og vælg "Føj til hjemmeskærm" for at installere WeldCheck.',ttlsubAl:'overfladefejl (alu)',sub5817:'stål, nikkel, titan',sub10042:'aluminium',step0:'0 · Vælg standard',fatTtl:'Udmattelse (Anneks B)',fatSub:'Yderligere FAT-kriterier',fatApplied:'FAT-kriterium anvendt:',fatNoteBase:'Yderligere kriterier for udmattelsespåvirkede svejsninger. Bygger oven på niveau B/C. Hvor intet ekstra er angivet, gælder basisværdien.',fatNoteFillet:'Kantsømme er undtaget fra B125.',fatToeRadius:'Overgangsradius (udmattelse)',fatAngular:'Vinkelknæk β'},
+    cTitle:'Kontakt',cBody:'Spørgsmål, fejl eller forslag til værktøjet? Skriv gerne.',cMail:'Send e-mail',cClose:'Luk',installTxt:'Installér app',statNote:'Måler anonym brugsstatistik (besøgstal, land/by). Ingen cookies, ingen personlige oplysninger.',iosHintTxt:'Tip: tryk Del-knappen og vælg "Føj til hjemmeskærm" for at installere WeldCheck.',ttlsubAl:'overfladefejl (alu)',sub5817:'stål, nikkel, titan',sub10042:'aluminium',step0:'0 · Vælg standard',fatTtl:'Udmattelse (Anneks B)',fatSub:'Yderligere FAT-kriterier',fatApplied:'FAT-kriterium anvendt:',fatNoteBase:'Yderligere kriterier for udmattelsespåvirkede svejsninger. Bygger oven på niveau B/C. Hvor intet ekstra er angivet, gælder basisværdien.',fatNoteFillet:'Kantsømme er undtaget fra B125.',fatToeRadius:'Overgangsradius (udmattelse)',fatAngular:'Vinkelknæk β'},
   en:{flag:'🇬🇧',code:'EN',ttl:'Visual weld inspection',ttlsub:'surface imperfections',
     step1:'1 · Select quality level',step2:'2 · Enter dimensions',step3:'3 · Acceptance limits (visible defects)',
     dDesc:'Moderate',cDesc:'Intermediate',bDesc:'Stringent',
@@ -333,7 +335,7 @@ const I = {
     maxLbl:'Max.',minAngle:'Min. angle',forLevel:'Quality level',
     enterB:'Enter weld width b',
     disc:'This tool covers <b>only visually detectable surface imperfections</b> from Table 1. Internal imperfections (inter-run lack of fusion, inclusions, volume porosity, micro defects etc.) require NDT and are intentionally omitted. Values are indicative — the applicable standard is always authoritative.',
-    cTitle:'Contact',cBody:'Questions, errors or suggestions for the tool? Feel free to write.',cMail:'Send e-mail',cClose:'Close',installTxt:'Install app',iosHintTxt:'Tip: tap the Share button and choose "Add to Home Screen" to install WeldCheck.',ttlsubAl:'surface imperfections (alu)',sub5817:'steel, nickel, titanium',sub10042:'aluminium',step0:'0 · Select standard',fatTtl:'Fatigue (Annex B)',fatSub:'Additional FAT criteria',fatApplied:'FAT criterion applied:',fatNoteBase:'Additional criteria for welds subject to fatigue. Builds on level B/C. Where no extra value is given, the base value applies.',fatNoteFillet:'Fillet welds are excluded from B125.',fatToeRadius:'Weld toe radius (fatigue)',fatAngular:'Angular misalignment β'},
+    cTitle:'Contact',cBody:'Questions, errors or suggestions for the tool? Feel free to write.',cMail:'Send e-mail',cClose:'Close',installTxt:'Install app',statNote:'Collects anonymous usage statistics (visits, country/city). No cookies, no personal data.',iosHintTxt:'Tip: tap the Share button and choose "Add to Home Screen" to install WeldCheck.',ttlsubAl:'surface imperfections (alu)',sub5817:'steel, nickel, titanium',sub10042:'aluminium',step0:'0 · Select standard',fatTtl:'Fatigue (Annex B)',fatSub:'Additional FAT criteria',fatApplied:'FAT criterion applied:',fatNoteBase:'Additional criteria for welds subject to fatigue. Builds on level B/C. Where no extra value is given, the base value applies.',fatNoteFillet:'Fillet welds are excluded from B125.',fatToeRadius:'Weld toe radius (fatigue)',fatAngular:'Angular misalignment β'},
   de:{flag:'🇩🇪',code:'DE',ttl:'Visuelle Schweißnahtprüfung',ttlsub:'Oberflächenfehler',
     step1:'1 · Bewertungsgruppe wählen',step2:'2 · Maße eingeben',step3:'3 · Grenzwerte (sichtbare Fehler)',
     dDesc:'Moderat',cDesc:'Mittel',bDesc:'Höchste',
@@ -348,7 +350,7 @@ const I = {
     maxLbl:'Max.',minAngle:'Min. Winkel',forLevel:'Bewertungsgruppe',
     enterB:'Nahtbreite b eingeben',
     disc:'Dieses Werkzeug umfasst <b>nur visuell erkennbare Oberflächenfehler</b> aus Tabelle 1. Innere Fehler (Bindefehler zwischen Lagen, Einschlüsse, Volumenporosität, Mikrofehler usw.) erfordern ZfP und sind bewusst ausgelassen. Die Werte sind Richtwerte — die geltende Norm ist immer maßgebend.',
-    cTitle:'Kontakt',cBody:'Fragen, Fehler oder Vorschläge zum Werkzeug? Schreiben Sie gerne.',cMail:'E-Mail senden',cClose:'Schließen',installTxt:'App installieren',iosHintTxt:'Tipp: Tippen Sie auf "Teilen" und wählen Sie "Zum Home-Bildschirm" um WeldCheck zu installieren.',ttlsubAl:'Oberflächenfehler (Alu)',sub5817:'Stahl, Nickel, Titan',sub10042:'Aluminium',step0:'0 · Norm wählen',fatTtl:'Ermüdung (Anhang B)',fatSub:'Zusätzliche FAT-Kriterien',fatApplied:'FAT-Kriterium angewendet:',fatNoteBase:'Zusätzliche Kriterien für schwingbeanspruchte Schweißnähte. Baut auf Gruppe B/C auf. Wo kein Zusatzwert angegeben ist, gilt der Basiswert.',fatNoteFillet:'Kehlnähte sind von B125 ausgeschlossen.',fatToeRadius:'Nahtübergangsradius (Ermüdung)',fatAngular:'Winkelversatz β'},
+    cTitle:'Kontakt',cBody:'Fragen, Fehler oder Vorschläge zum Werkzeug? Schreiben Sie gerne.',cMail:'E-Mail senden',cClose:'Schließen',installTxt:'App installieren',statNote:'Erfasst anonyme Nutzungsstatistik (Besuche, Land/Stadt). Keine Cookies, keine personenbezogenen Daten.',iosHintTxt:'Tipp: Tippen Sie auf "Teilen" und wählen Sie "Zum Home-Bildschirm" um WeldCheck zu installieren.',ttlsubAl:'Oberflächenfehler (Alu)',sub5817:'Stahl, Nickel, Titan',sub10042:'Aluminium',step0:'0 · Norm wählen',fatTtl:'Ermüdung (Anhang B)',fatSub:'Zusätzliche FAT-Kriterien',fatApplied:'FAT-Kriterium angewendet:',fatNoteBase:'Zusätzliche Kriterien für schwingbeanspruchte Schweißnähte. Baut auf Gruppe B/C auf. Wo kein Zusatzwert angegeben ist, gilt der Basiswert.',fatNoteFillet:'Kehlnähte sind von B125 ausgeschlossen.',fatToeRadius:'Nahtübergangsradius (Ermüdung)',fatAngular:'Winkelversatz β'},
   pl:{flag:'🇵🇱',code:'PL',ttl:'Wizualna kontrola spoin',ttlsub:'niezgodności powierzchniowe',
     step1:'1 · Wybierz poziom jakości',step2:'2 · Wprowadź wymiary',step3:'3 · Granice akceptacji (widoczne wady)',
     dDesc:'Umiarkowany',cDesc:'Średni',bDesc:'Najwyższy',
@@ -363,7 +365,7 @@ const I = {
     maxLbl:'Maks.',minAngle:'Min. kąt',forLevel:'Poziom jakości',
     enterB:'Wprowadź szerokość spoiny b',
     disc:'Narzędzie obejmuje <b>tylko widoczne niezgodności powierzchniowe</b> z Tablicy 1. Wady wewnętrzne (brak przetopu między ściegami, wtrącenia, porowatość objętościowa, mikrowady itp.) wymagają badań NDT i zostały celowo pominięte. Wartości są orientacyjne — obowiązująca norma jest zawsze wiążąca.',
-    cTitle:'Kontakt',cBody:'Pytania, błędy lub sugestie dotyczące narzędzia? Napisz śmiało.',cMail:'Wyślij e-mail',cClose:'Zamknij',installTxt:'Zainstaluj aplikację',iosHintTxt:'Wskazówka: dotknij przycisku Udostępnij i wybierz "Do ekranu początkowego", aby zainstalować WeldCheck.',ttlsubAl:'niezgodności powierzchniowe (alu)',sub5817:'stal, nikiel, tytan',sub10042:'aluminium',step0:'0 · Wybierz normę',fatTtl:'Zmęczenie (Załącznik B)',fatSub:'Dodatkowe kryteria FAT',fatApplied:'Zastosowane kryterium FAT:',fatNoteBase:'Dodatkowe kryteria dla spoin obciążonych zmęczeniowo. Bazuje na poziomie B/C. Gdzie nie podano wartości dodatkowej, obowiązuje wartość bazowa.',fatNoteFillet:'Spoiny pachwinowe są wyłączone z B125.',fatToeRadius:'Promień przejścia (zmęczenie)',fatAngular:'Przesunięcie kątowe β'},
+    cTitle:'Kontakt',cBody:'Pytania, błędy lub sugestie dotyczące narzędzia? Napisz śmiało.',cMail:'Wyślij e-mail',cClose:'Zamknij',installTxt:'Zainstaluj aplikację',statNote:'Zbiera anonimowe statystyki użycia (odwiedziny, kraj/miasto). Bez ciasteczek, bez danych osobowych.',iosHintTxt:'Wskazówka: dotknij przycisku Udostępnij i wybierz "Do ekranu początkowego", aby zainstalować WeldCheck.',ttlsubAl:'niezgodności powierzchniowe (alu)',sub5817:'stal, nikiel, tytan',sub10042:'aluminium',step0:'0 · Wybierz normę',fatTtl:'Zmęczenie (Załącznik B)',fatSub:'Dodatkowe kryteria FAT',fatApplied:'Zastosowane kryterium FAT:',fatNoteBase:'Dodatkowe kryteria dla spoin obciążonych zmęczeniowo. Bazuje na poziomie B/C. Gdzie nie podano wartości dodatkowej, obowiązuje wartość bazowa.',fatNoteFillet:'Spoiny pachwinowe są wyłączone z B125.',fatToeRadius:'Promień przejścia (zmęczenie)',fatAngular:'Przesunięcie kątowe β'},
   ro:{flag:'🇷🇴',code:'RO',ttl:'Control vizual al sudurilor',ttlsub:'imperfecțiuni de suprafață',
     step1:'1 · Alege nivelul de calitate',step2:'2 · Introdu dimensiunile',step3:'3 · Limite de acceptare (defecte vizibile)',
     dDesc:'Moderat',cDesc:'Mediu',bDesc:'Maxim',
@@ -378,7 +380,7 @@ const I = {
     maxLbl:'Max.',minAngle:'Unghi min.',forLevel:'Nivel de calitate',
     enterB:'Introdu lățimea sudurii b',
     disc:'Instrumentul acoperă <b>numai imperfecțiunile de suprafață vizibile</b> din Tabelul 1. Defectele interne (lipsă de topire între treceri, incluziuni, porozitate de volum, micro-defecte etc.) necesită examinări NDT și sunt omise intenționat. Valorile sunt orientative — standardul aplicabil este întotdeauna autoritatea.',
-    cTitle:'Contact',cBody:'Întrebări, erori sau sugestii pentru instrument? Scrieți cu încredere.',cMail:'Trimite e-mail',cClose:'Închide',installTxt:'Instalează aplicația',iosHintTxt:'Sfat: apăsați butonul Partajare și alegeți "Adăugare la ecranul principal" pentru a instala WeldCheck.',ttlsubAl:'imperfecțiuni de suprafață (alu)',sub5817:'oțel, nichel, titan',sub10042:'aluminiu',step0:'0 · Alege standardul',fatTtl:'Oboseală (Anexa B)',fatSub:'Criterii FAT suplimentare',fatApplied:'Criteriu FAT aplicat:',fatNoteBase:'Criterii suplimentare pentru suduri solicitate la oboseală. Se bazează pe nivelul B/C. Unde nu este dată o valoare suplimentară, se aplică valoarea de bază.',fatNoteFillet:'Sudurile de colț sunt excluse din B125.',fatToeRadius:'Raza de racordare (oboseală)',fatAngular:'Dezaxare unghiulară β'},
+    cTitle:'Contact',cBody:'Întrebări, erori sau sugestii pentru instrument? Scrieți cu încredere.',cMail:'Trimite e-mail',cClose:'Închide',installTxt:'Instalează aplicația',statNote:'Colectează statistici anonime de utilizare (vizite, țară/oraș). Fără cookie-uri, fără date personale.',iosHintTxt:'Sfat: apăsați butonul Partajare și alegeți "Adăugare la ecranul principal" pentru a instala WeldCheck.',ttlsubAl:'imperfecțiuni de suprafață (alu)',sub5817:'oțel, nichel, titan',sub10042:'aluminiu',step0:'0 · Alege standardul',fatTtl:'Oboseală (Anexa B)',fatSub:'Criterii FAT suplimentare',fatApplied:'Criteriu FAT aplicat:',fatNoteBase:'Criterii suplimentare pentru suduri solicitate la oboseală. Se bazează pe nivelul B/C. Unde nu este dată o valoare suplimentară, se aplică valoarea de bază.',fatNoteFillet:'Sudurile de colț sunt excluse din B125.',fatToeRadius:'Raza de racordare (oboseală)',fatAngular:'Dezaxare unghiulară β'},
   lt:{flag:'🇱🇹',code:'LT',ttl:'Vizualinė suvirinimo kontrolė',ttlsub:'paviršiaus defektai',
     step1:'1 · Pasirinkite kokybės lygį',step2:'2 · Įveskite matmenis',step3:'3 · Priimtinumo ribos (matomi defektai)',
     dDesc:'Vidutinis',cDesc:'Vidutinis+',bDesc:'Aukščiausias',
@@ -393,7 +395,7 @@ const I = {
     maxLbl:'Maks.',minAngle:'Min. kampas',forLevel:'Kokybės lygis',
     enterB:'Įveskite siūlės plotį b',
     disc:'Įrankis apima <b>tik vizualiai matomus paviršiaus defektus</b> iš 1 lentelės. Vidiniai defektai (nesutirpimas tarp sluoksnių, intarpai, tūrinis poringumas, mikrodefektai ir kt.) reikalauja NDT ir sąmoningai praleisti. Reikšmės yra orientacinės — galiojantis standartas visada yra autoritetas.',
-    cTitle:'Kontaktai',cBody:'Klausimai, klaidos ar pasiūlymai dėl įrankio? Drąsiai rašykite.',cMail:'Siųsti el. laišką',cClose:'Uždaryti',installTxt:'Įdiegti programą',iosHintTxt:'Patarimas: bakstelėkite Bendrinti ir pasirinkite "Įtraukti į pagrindinį ekraną", kad įdiegtumėte WeldCheck.',ttlsubAl:'paviršiaus defektai (alu)',sub5817:'plienas, nikelis, titanas',sub10042:'aliuminis',step0:'0 · Pasirinkite standartą',fatTtl:'Nuovargis (B priedas)',fatSub:'Papildomi FAT kriterijai',fatApplied:'Pritaikytas FAT kriterijus:',fatNoteBase:'Papildomi kriterijai nuovargio veikiamoms siūlėms. Remiasi B/C lygiu. Kur papildoma vertė nenurodyta, taikoma bazinė vertė.',fatNoteFillet:'Kampinės siūlės neįtraukiamos į B125.',fatToeRadius:'Perėjimo spindulys (nuovargis)',fatAngular:'Kampinis poslinkis β'}
+    cTitle:'Kontaktai',cBody:'Klausimai, klaidos ar pasiūlymai dėl įrankio? Drąsiai rašykite.',cMail:'Siųsti el. laišką',cClose:'Uždaryti',installTxt:'Įdiegti programą',statNote:'Renka anoniminę naudojimo statistiką (apsilankymai, šalis/miestas). Jokių slapukų, jokių asmens duomenų.',iosHintTxt:'Patarimas: bakstelėkite Bendrinti ir pasirinkite "Įtraukti į pagrindinį ekraną", kad įdiegtumėte WeldCheck.',ttlsubAl:'paviršiaus defektai (alu)',sub5817:'plienas, nikelis, titanas',sub10042:'aliuminis',step0:'0 · Pasirinkite standartą',fatTtl:'Nuovargis (B priedas)',fatSub:'Papildomi FAT kriterijai',fatApplied:'Pritaikytas FAT kriterijus:',fatNoteBase:'Papildomi kriterijai nuovargio veikiamoms siūlėms. Remiasi B/C lygiu. Kur papildoma vertė nenurodyta, taikoma bazinė vertė.',fatNoteFillet:'Kampinės siūlės neįtraukiamos į B125.',fatToeRadius:'Perėjimo spindulys (nuovargis)',fatAngular:'Kampinis poslinkis β'}
 };
 
 const SYM = {
@@ -553,6 +555,7 @@ function applyStatic(){
   document.getElementById('cClose').textContent=t('cClose');
   document.getElementById('installTxt').textContent=t('installTxt');
   document.getElementById('iosHintTxt').textContent=t('iosHintTxt');
+  document.getElementById('statNote').textContent=t('statNote');
   document.getElementById('fatTtl').textContent=t('fatTtl');
   document.getElementById('fatSub').textContent=t('fatSub');
   buildSymbols();
@@ -1101,5 +1104,9 @@ function dismissIosHint(){
   try{ localStorage.setItem('wc_ios_hint','1'); }catch(e){}
 }
 </script>
+
+<!-- Anonym statistik (GoatCounter) — viser besøgstal, land/by og enhed, uden cookies. -->
+<script data-goatcounter="https://bernt84.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
